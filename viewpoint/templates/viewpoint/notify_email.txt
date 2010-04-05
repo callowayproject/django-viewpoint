@@ -1,0 +1,6 @@
+{{ comment.user_name }} made the following comment on {{ entry.title }}:
+
+
+{{ comment.comment }}
+
+Entry Link: {{ request.host }}{{ entry.get_absolute_url }}
