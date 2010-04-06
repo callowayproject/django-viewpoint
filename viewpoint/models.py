@@ -1,14 +1,31 @@
 from django.db import models
+from django.db.models import Q
 from django.utils.translation import ugettext_lazy as _
 from django.template.defaultfilters import slugify
-from categories.models import Category
-import tagging
-from tagging.fields import TagField
+from django.conf import settings
 
-try:
-    from staff.models import StaffMember as AuthorModel
-except ImportError:
-    from django.contrib.auth.models import User as AuthorModel
+from viewpoint.settings import STAFF_ONLY, RELATION_MODELS
+
+if 'tagging' in settings.INSTALLED_APPS:
+    import tagging
+    from tagging.fields import TagField
+    HAS_TAGGING = True
+else:
+    HAS_TAGGING = False
+
+if 'categories' in settings.INSTALLED_APPS:
+    from categories.models import Category
+    HAS_CATEGORIES = True
+else:
+    HAS_CATEGORIES = False
+
+from django.contrib.auth.models import User as AuthorModel
+
+if STAFF_ONLY:
+    AUTHOR_LIMIT_CHOICES = {'is_staff': True}
+else:
+    AUTHOR_LIMIT_CHOICES = {}
+
 
 class BlogManager(models.Manager):
     def published(self, **kwargs):
@@ -22,9 +39,10 @@ class Blog(models.Model):
     tease = models.TextField()
     description = models.TextField()
     photo = models.ImageField(null=True,blank=True,upload_to='photos/blog/%Y/%m/%d/')
-    owner = models.ManyToManyField(AuthorModel, blank=True)
+    owner = models.ManyToManyField(AuthorModel, blank=True, limit_choices_to=AUTHOR_LIMIT_CHOICES)
     public = models.BooleanField(default=True)
-    category = models.ForeignKey(Category,related_name='blog_categories',
+    if HAS_CATEGORIES:
+        category = models.ForeignKey(Category,related_name='viewpoint_categories',
                                         blank=True,null=True)
     
     objects = BlogManager()
@@ -39,7 +57,7 @@ class Blog(models.Model):
 
     @models.permalink
     def get_absolute_url(self):
-        return ('blog_detail', None, {'slug': self.slug})
+        return ('viewpoint_detail', None, {'slug': self.slug})
         
     class Meta:
         ordering = ('title',)
@@ -52,22 +70,24 @@ class EntryManager(models.Manager):
         return self.filter(**kwargs)
 
 class Entry(models.Model):
-    pub_date = models.DateField(auto_now_add=True)
-    pub_time = models.TimeField(auto_now_add=True)
-    update_date = models.DateTimeField(auto_now=True)
+    blog = models.ForeignKey(Blog)
     title = models.CharField(max_length=255)
     slug = models.SlugField(unique_for_date='pub_date')
-    tease = models.TextField()
-    photo = models.ImageField(null=True,blank=True,upload_to='photos/blog/entries/%Y/%m/%d/')
+    author = models.ForeignKey(AuthorModel)
     credit = models.CharField(max_length=255,blank=True,null=True)
+    photo = models.ImageField(null=True,blank=True,upload_to='photos/blog/entries/%Y/%m/%d/')
+    tease = models.TextField()
     body = models.TextField()
     public = models.BooleanField(default=True)
     approved = models.BooleanField(default=False)
-    author = models.ForeignKey(AuthorModel)
-    blog = models.ForeignKey(Blog)
-    category = models.ForeignKey(Category,related_name='entry_categories',
+    pub_date = models.DateField(auto_now_add=True)
+    pub_time = models.TimeField(auto_now_add=True)
+    update_date = models.DateTimeField(auto_now=True)
+    if HAS_CATEGORIES:
+        category = models.ForeignKey(Category,related_name='entry_categories',
                                         blank=True,null=True)
-    tags = TagField(blank=True, null=True)
+    if HAS_TAGGING:
+        tags = TagField(blank=True, null=True)
     objects = EntryManager()
     
     class Meta:
@@ -81,7 +101,8 @@ class Entry(models.Model):
     def save(self, *a, **kw):
         if not self.slug:
             self.slug = slugify(self.title)[:50]
-        self.category = self.blog.category
+        if HAS_CATEGORIES:
+            self.category = self.blog.category
         super(Entry, self).save(*a, **kw)
 
     @models.permalink
@@ -93,18 +114,14 @@ class Entry(models.Model):
             'day': self.pub_date.day,
             'slug': self.slug
         })
-        
-tagging.register(Blog)
-#tagging.register(Entry)
 
-from django.conf import settings
+if HAS_TAGGING:
+    tagging.register(Blog)
 
-if hasattr(settings, 'ENTRY_RELATION_MODELS'):
-    from django.db.models import Q
+if RELATION_MODELS:
     from django.contrib.contenttypes.models import ContentType
     from django.contrib.contenttypes import generic
     
-    RELATION_MODELS = getattr(settings, 'ENTRY_RELATION_MODELS', [])
     RELATIONS = [Q(app_label=al, model=m) for al, m in [x.split('.') for x in RELATION_MODELS]]
     
     entry_relation_limits = reduce(lambda x,y: x|y, RELATIONS)
@@ -119,8 +136,6 @@ if hasattr(settings, 'ENTRY_RELATION_MODELS'):
             blank=True, 
             null=True,
             help_text=_("A generic text field to tag a relation, like 'leadphoto'."))
-
+            
         def __unicode__(self):
             return u"EntryRelation"
-    
-

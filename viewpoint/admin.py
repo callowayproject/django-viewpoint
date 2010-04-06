@@ -1,10 +1,9 @@
 from models import Blog, Entry
 from forms import BlogForm, EntryForm
 from django.contrib import admin
-from autocomplete.admin import AutoCompleteAdmin
 from django.conf import settings
 
-class BlogAdmin(AutoCompleteAdmin):
+class BlogAdmin(admin.ModelAdmin):
     form = BlogForm
     prepopulated_fields = {"slug": ("title",)}
     related_search_fields = {
@@ -13,14 +12,12 @@ class BlogAdmin(AutoCompleteAdmin):
     
     def queryset(self, request):
         qs = super(BlogAdmin, self).queryset(request)
-        from profiles import get_profile
-        profile = get_profile(request.user)
         if request.user.is_superuser:
             return qs
-        elif profile.is_mayor:
-            return qs.filter(category__in=profile.categories.all())
+        else:
+            return request.user.blog_set.all()
         return []
-    
+
 
 if hasattr(settings, 'ENTRY_RELATION_MODELS'):
     from genericcollections import *
@@ -30,7 +27,7 @@ if hasattr(settings, 'ENTRY_RELATION_MODELS'):
         model = EntryRelation
 
 
-class EntryAdmin(AutoCompleteAdmin):
+class EntryAdmin(admin.ModelAdmin):
     form = EntryForm
     prepopulated_fields = {"slug": ("title",)}
     exclude = ['approved', 'public']
@@ -45,10 +42,22 @@ class EntryAdmin(AutoCompleteAdmin):
     if hasattr(settings, 'ENTRY_RELATION_MODELS'):
         inlines = (InlineEntryRelation,)
     
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if not request.user.is_superuser:
+            if db_field.name == "author":
+                from django.contrib.auth.models import User
+                kwargs["queryset"] = User.objects.filter(pk=request.user.pk)
+                return db_field.formfield(**kwargs)
+            elif db_field.name == "blog":
+                kwargs["queryset"] = request.user.blog_set.all()
+                return db_field.formfield(**kwargs)
+        return super(EntryAdmin, self).formfield_for_foreignkey(db_field, request, **kwargs)
+    
+    
     def make_approved(self, request, queryset):
         rows_updated = queryset.update(approved=True)
         if rows_updated == 1:
-            message_bit = "1 entry was"
+            message_bit = "One entry was"
         else:
             message_bit = "%s entries were" % rows_updated
         self.message_user(request, "%s successfully marked as APPROVED." % message_bit)
@@ -83,12 +92,8 @@ class EntryAdmin(AutoCompleteAdmin):
     
     def queryset(self, request):
         qs = super(EntryAdmin, self).queryset(request)
-        from profiles import get_profile
-        profile = get_profile(request.user)
         if request.user.is_superuser:
             return qs
-        elif profile.is_mayor:
-            return qs.filter(blog__category__in=profile.categories.all())
         else:
             return qs.filter(author__pk=request.user.pk)
     
