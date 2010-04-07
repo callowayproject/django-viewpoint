@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from setuputils import setup
+from setuptools import setup
 import os
 import viewpoint
 
