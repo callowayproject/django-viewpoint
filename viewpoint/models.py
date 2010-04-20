@@ -3,6 +3,7 @@ from django.db.models import Q
 from django.utils.translation import ugettext_lazy as _
 from django.template.defaultfilters import slugify
 from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist
 
 from viewpoint.settings import STAFF_ONLY, RELATION_MODELS
 
@@ -19,12 +20,15 @@ if 'categories' in settings.INSTALLED_APPS:
 else:
     HAS_CATEGORIES = False
 
-from django.contrib.auth.models import User as AuthorModel
-
-if STAFF_ONLY:
-    AUTHOR_LIMIT_CHOICES = {'is_staff': True}
+if 'staff' in settings.INSTALLED_APPS:
+    from staff.models import StaffMember as AuthorModel
 else:
-    AUTHOR_LIMIT_CHOICES = {}
+    from django.contrib.auth.models import User as AuthorModel
+
+AUTHOR_LIMIT_CHOICES = {}
+
+if STAFF_ONLY and not 'staff' in settings.INSTALLED_APPS:
+    AUTHOR_LIMIT_CHOICES = {'is_staff': True}
 
 
 class BlogManager(models.Manager):
@@ -39,7 +43,7 @@ class Blog(models.Model):
     tease = models.TextField()
     description = models.TextField()
     photo = models.ImageField(null=True,blank=True,upload_to='photos/blog/%Y/%m/%d/')
-    owner = models.ManyToManyField(AuthorModel, blank=True, limit_choices_to=AUTHOR_LIMIT_CHOICES)
+    owners = models.ManyToManyField(AuthorModel, blank=True, limit_choices_to=AUTHOR_LIMIT_CHOICES)
     public = models.BooleanField(default=True)
     if HAS_CATEGORIES:
         category = models.ForeignKey(Category,related_name='viewpoint_categories',
@@ -91,7 +95,7 @@ class Entry(models.Model):
     objects = EntryManager()
     
     class Meta:
-        unique_together = ('slug','pub_date')
+        #unique_together = ('slug','pub_date')
         verbose_name_plural = _('Entries')
         get_latest_by = 'update_date'
         
@@ -102,7 +106,10 @@ class Entry(models.Model):
         if not self.slug:
             self.slug = slugify(self.title)[:50]
         if HAS_CATEGORIES:
-            self.category = self.blog.category
+            try:
+                self.category = self.blog.category
+            except ObjectDoesNotExist:
+                pass
         super(Entry, self).save(*a, **kw)
 
     @models.permalink
