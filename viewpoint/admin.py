@@ -9,7 +9,7 @@ class BlogAdmin(admin.ModelAdmin):
     related_search_fields = {
         'owner': ('^user__username', '^first_name', '^last_name'),
     }
-    
+
     def queryset(self, request):
         qs = super(BlogAdmin, self).queryset(request)
         if request.user.is_superuser:
@@ -38,6 +38,7 @@ class EntryAdmin(admin.ModelAdmin):
     actions = ['make_approved', 'make_not_approved', 'make_public', 'make_not_public']
     search_fields = ('blog__title','title','tease','body')   
     list_filter = ('blog',)
+    raw_id_fields = ('author','blog')
     
     if hasattr(settings, 'ENTRY_RELATION_MODELS'):
         inlines = (InlineEntryRelation,)
