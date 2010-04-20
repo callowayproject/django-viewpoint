@@ -1,0 +1,5 @@
+recursive-include viewpoint *.html *.txt
+include requirements.txt
+recursive-include doc_src *.rst *.txt *.png *.css *.html *.js
+include doc_src/Makefile
+include doc_src/make.bat
