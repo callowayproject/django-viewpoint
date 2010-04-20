@@ -1,10 +1,10 @@
 from models import Blog, Entry
-from categories.models import Category
-from profiles.models import Profile
-from staff.models import StaffMember 
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.comments.models import Comment
 from django.db import connection
+
+from categories.models import Category
+from staff.models import StaffMember 
 
 
 def get_blogs(category=None):
@@ -33,12 +33,6 @@ def get_entries(blog=None, category=None, limit=None):
 get_entries.function = 1    
     
   
-def get_mayor_from_category(category):
-    for profile in Profile.objects.filter(is_mayor=True):
-        if category in profile.categories.all():
-            return StaffMember.objects.get(user=profile.user)
-get_mayor_from_category.function = 1
-
 def get_comment_count(entry):
     return Comment.objects.filter(
         content_type = ContentType.objects.get_for_model(Entry),
