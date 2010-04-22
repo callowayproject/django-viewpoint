@@ -30,7 +30,7 @@ if hasattr(settings, 'ENTRY_RELATION_MODELS'):
 class EntryAdmin(admin.ModelAdmin):
     form = EntryForm
     prepopulated_fields = {"slug": ("title",)}
-    exclude = ['approved', 'public']
+    exclude = ['approved']
     list_display = ('title', 'pub_date','blog', 'public', 'approved')
     related_search_fields = {
         'author': ('^user__username', '^first_name', '^last_name'),
