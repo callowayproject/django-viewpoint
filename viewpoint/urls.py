@@ -1,33 +1,41 @@
-from django.views.generic.date_based import archive_day, archive_month, archive_year, object_detail
+from django.views.generic.date_based import archive_day, archive_month, \
+                                            archive_year, archive_today, \
+                                            archive_week, object_detail
 from django.conf.urls.defaults import *
-from feeds import LatestEntriesByBlog, LatestEntriesByCategory, LatestEntries, EntryComments
+from django.conf import settings
+from feeds import LatestEntriesByBlog, LatestEntries #, EntryComments
 from models import Blog, Entry
 
-def generic_blog_entry_view(blog_slug, year, month=None, day=None, slug=None, **kwargs):
+def generic_blog_entry_view(request, *args,  **kwargs):
+    blog_slug = kwargs.pop('blog_slug')
     queryset = Entry.objects.filter(blog__slug=blog_slug)
     params = {
         'queryset': queryset,
-        'year': year,
-        'month': month,
-        'day': day,
-        'slug': slug,
+        'date_field': 'pub_date'
     }
     params.update(kwargs)
-    if month and day and slug:
-        return object_detail(**params)
-    elif month and day:
-        return archive_day(**params)
-    elif month:
-        return archive_month(**params)
+    if 'slug' in kwargs.keys():
+        return object_detail(request, **params)
+    elif 'day' in kwargs.keys():
+        return archive_day(request, **params)
+    elif 'month' in kwargs.keys():
+        return archive_month(request, **params)
+    elif 'week' in kwargs.keys():
+        return archive_week(request, **params)
+    elif 'year' in kwargs.keys():
+        return archive_year(request, **params)
     else:
-        return archive_year(**params)
+        return archive_today(request, **params)
 
 feeds = {
     'all': LatestEntries,
     'latest': LatestEntriesByBlog,
-    'categories': LatestEntriesByCategory,
-    'comments': EntryComments,
+    #'comments': EntryComments,
 }
+
+if 'categories' in settings.INSTALLED_APPS:
+    from feeds import LatestEntriesByCategory
+    feeds['categories'] = LatestEntriesByCategory
 
 
 urlpatterns = patterns('django.contrib.syndication.views',
@@ -35,19 +43,71 @@ urlpatterns = patterns('django.contrib.syndication.views',
 )
 
 urlpatterns += patterns('',
-    url(r'^(?P<blog_slug>[-\w]+)/(?P<year>\d{4})/(?P<month>\w{3})/(?P<day>\d{1,2})/(?P<slug>[-\w]+)/$', 
-        generic_blog_entry_view, 
-        name='viewpoint_entry_detail'),
-    url(r'^(?P<slug>[-\w]+)/(?P<year>\d{4})/(?P<month>\w{3})/(?P<day>\d{1,2})/$', 
-        generic_blog_entry_view, 
-        name='viewpoint_archive_day'),
-    url(r'^(?P<slug>[-\w]+)/(?P<year>\d{4})/(?P<month>\w{3})/$', 
-        generic_blog_entry_view, 
-        name='viewpoint_archive_month'),
-    url(r'^(?P<slug>[-\w]+)/(?P<year>\d{4})/$', 
-        generic_blog_entry_view, 
-        name='viewpoint_archive_year'),
-    url(r'^(?P<slug>[-\w]+)/$', 
-        'django.views.generic.list_detail.object_detail', 
-        name='viewpoint_detail'),
+    # Blog Index (listing of all public blogs)
+    url(
+        regex = r'^$',
+        view = 'django.views.generic.list_detail.object_list',
+        kwargs = {
+            'template_name': 'viewpoint/index.html',
+            'queryset': Blog.objects.filter(public=True)},
+        name = "viewpoint_blog_index"
+    ),
+    # Blog detail (Main page of a blog, shows description and stuff)
+    url(
+        regex = r'^(?P<slug>[-\w]+)/$', 
+        view = 'django.views.generic.list_detail.object_detail',
+        kwargs = {'queryset': Blog.objects.filter(public=True),},
+        name='viewpoint_blog_detail'
+    ),
+    # Listing of blog entries for a given year
+    url(
+        regex = r'^(?P<blog_slug>[-\w]+)/(?P<year>\d{4})/$', 
+        view = generic_blog_entry_view, 
+        name='viewpoint_blog_archive_year'
+    ),
+    # Listing of blog entries for a given month/year
+    url(
+        regex = r'^(?P<blog_slug>[-\w]+)/(?P<year>\d{4})/(?P<month>\w{3})/$', 
+        view = generic_blog_entry_view, 
+        name = 'viewpoint_blog_archive_month'
+    ),
+    # Listing of blog entries for a given week of the year
+    url(
+        regex = r'^(?P<blog_slug>[-\w]+)/(?P<year>\d{4})/(?P<week>\d{1,2})/$',
+        view = generic_blog_entry_view,
+        name = 'viewpoint_blog_archive_week'
+    ),
+    # Listing of blog entries for a given day
+    url(
+        regex = r'^(?P<blog_slug>[-\w]+)/(?P<year>\d{4})/(?P<month>\w{3})/(?P<day>\d{1,2})/$', 
+        view = generic_blog_entry_view, 
+        name = 'viewpoint_blog_archive_day'
+    ),
+    # Listing of blog entries for the current date
+    url(
+        regex = r'^(?P<blog_slug>[-\w]+)/today/$', 
+        view = generic_blog_entry_view, 
+        name='viewpoint_blog_archive_today'
+    ),
+    # A blog entry
+    url(
+        regex = r'^(?P<blog_slug>[-\w]+)/(?P<year>\d{4})/(?P<month>\w{3})/(?P<day>\d{1,2})/(?P<slug>[-\w]+)/$', 
+        view = generic_blog_entry_view, 
+        name='viewpoint_entry_detail'
+    ),
+    # A blog comments page
+    url(
+        regex = r'^(?P<blog_slug>[-\w]+)/(?P<year>\d{4})/(?P<month>\w{3})/(?P<day>\d{1,2})/(?P<slug>[-\w]+)/comments/$', 
+        view = generic_blog_entry_view,
+        kwargs = {'template_name':'viewpoint/entry_comments.html'},
+        name='viewpoint_entry_comments'
+    ),
+    # A blog printing page
+    url(
+        regex = r'^(?P<blog_slug>[-\w]+)/(?P<year>\d{4})/(?P<month>\w{3})/(?P<day>\d{1,2})/(?P<slug>[-\w]+)/print/$', 
+        view = generic_blog_entry_view, 
+        kwargs = {'template_name':'viewpoint/entry_print.html'},
+        name='viewpoint_entry_print'
+    ),
+    
 )
