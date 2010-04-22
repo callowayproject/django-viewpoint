@@ -5,7 +5,9 @@ from django.template.defaultfilters import slugify
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 
-from viewpoint.settings import STAFF_ONLY, RELATION_MODELS
+from viewpoint.settings import STAFF_ONLY, RELATION_MODELS, USE_APPROVAL
+
+import datetime
 
 if 'tagging' in settings.INSTALLED_APPS:
     import tagging
@@ -61,7 +63,7 @@ class Blog(models.Model):
 
     @models.permalink
     def get_absolute_url(self):
-        return ('viewpoint_detail', None, {'slug': self.slug})
+        return ('viewpoint_blog_detail', None, {'slug': self.slug})
         
     class Meta:
         ordering = ('title',)
@@ -70,7 +72,10 @@ class Blog(models.Model):
 
 class EntryManager(models.Manager):
     def published(self, **kwargs):
-        kwargs.update(approved=True,public=True)
+        if USE_APPROVAL:
+            kwargs.update(approved=True,public=True)
+        else:
+            kwargs.update(public=True)
         return self.filter(**kwargs)
 
 class Entry(models.Model):
@@ -83,7 +88,7 @@ class Entry(models.Model):
     tease = models.TextField()
     body = models.TextField()
     public = models.BooleanField(default=True)
-    approved = models.BooleanField(default=False)
+    approved = models.BooleanField(default=not USE_APPROVAL)
     pub_date = models.DateField(auto_now_add=True)
     pub_time = models.TimeField(auto_now_add=True)
     update_date = models.DateTimeField(auto_now=True)
@@ -110,6 +115,7 @@ class Entry(models.Model):
                 self.category = self.blog.category
             except ObjectDoesNotExist:
                 pass
+        self.update_date = datetime.datetime.now()
         super(Entry, self).save(*a, **kw)
 
     @models.permalink
