@@ -1,0 +1,6 @@
+{% extends "viewpoint/viewpoint_base.html" %}
+{% block content %}
+<h1>{{ object.title }}</h1>
+<p class="byline">By {{ object.author.first_name }} {{ object.author.last_name }}</p>
+{{ object.body }}
+{% endblock %}

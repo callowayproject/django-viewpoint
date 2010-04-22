@@ -1,0 +1,10 @@
+{% extends "viewpoint/viewpoint_base.html" %}
+{% load comments %}
+{% block content %}
+	{% get_comment_list for object as comment_list %}
+	{% for comment in comment_list %}
+		<a name="c{{comment.id}}"></a>
+		<a href="{{ object.get_absolute_url }}comments/#c{{comment.id}}">Link to this comment</a>
+		{{comment}}
+	{% endfor %}
+{% endblock %}

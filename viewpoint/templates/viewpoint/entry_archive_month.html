@@ -1,0 +1,13 @@
+{% extends "viewpoint/viewpoint_base.html" %}
+
+{% block content %}
+	<h1>Entry Archive {{ month|date:"F Y" }}</h1>
+	{% for object in object_list %}
+		{% ifchanged object.publish_date %}
+			{% if not forloop.first %}</ul>{% endif %}
+			<h2>{{ object.pub_date|date:"F d Y"}}</h2>
+			<ul>{% endifchanged %}
+		<li><a href="{{ object.get_absolute_url }}">{{ object.title }}</a></li>
+	{% endfor %}
+	</ul>
+{% endblock %}
