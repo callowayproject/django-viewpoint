@@ -1,4 +1,4 @@
-from models import Blog, Entry
+from models import Blog, Entry, HAS_CATEGORIES
 from forms import BlogForm, EntryForm
 from django.contrib import admin
 from django.conf import settings
@@ -25,6 +25,8 @@ class BlogAdmin(admin.ModelAdmin):
             'classes': ('collapse',),
         }),
     )
+    if HAS_CATEGORIES:
+        fieldsets[-1][1]['fields'] += ('category',)
 
     def queryset(self, request):
         qs = super(BlogAdmin, self).queryset(request)
