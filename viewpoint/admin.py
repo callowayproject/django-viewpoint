@@ -9,6 +9,22 @@ class BlogAdmin(admin.ModelAdmin):
     related_search_fields = {
         'owner': ('^user__username', '^first_name', '^last_name'),
     }
+    fieldsets = (
+        (None, {
+            'fields': ('title', 'tease', 'photo'),
+        }),
+        ('Ownership and Viewing', {
+            'fields': ('public', 'owners'),
+        }),
+        ('Meta Data', {
+            'fields': ('alternate_title', 'description', 'meta_keywords', 'meta_extra'),
+            'classes': ('collapse',),
+        }),
+        ('Advanced', {
+            'fields': ('slug',),
+            'classes': ('collapse',),
+        }),
+    )
 
     def queryset(self, request):
         qs = super(BlogAdmin, self).queryset(request)

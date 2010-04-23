@@ -39,17 +39,34 @@ class BlogManager(models.Manager):
         return self.filter(**kwargs)
 
 class Blog(models.Model):
-    creation_date = models.DateTimeField(auto_now_add=True)
     title = models.CharField(max_length=255)
     slug = models.SlugField(unique=True)
-    tease = models.TextField()
-    description = models.TextField()
+    tease = models.TextField(blank=True)
     photo = models.ImageField(null=True,blank=True,upload_to='photos/blog/%Y/%m/%d/')
     owners = models.ManyToManyField(AuthorModel, blank=True, limit_choices_to=AUTHOR_LIMIT_CHOICES)
     public = models.BooleanField(default=True)
+    creation_date = models.DateTimeField(auto_now_add=True)
     if HAS_CATEGORIES:
         category = models.ForeignKey(Category,related_name='viewpoint_categories',
                                         blank=True,null=True)
+    alternate_title = models.CharField(
+        blank=True,
+        default="",
+        max_length=100,
+        help_text="An alternative title to use on pages with this category."
+    )
+    description = models.TextField(blank=True, null=True)
+    meta_keywords = models.CharField(
+        blank=True,
+        null=True,
+        default="",
+        max_length=255,
+        help_text="Comma-separated keywords for search engines.")
+    meta_extra = models.TextField(
+        blank=True,
+        null=True,
+        default="",
+        help_text="(Advanced) Any additional HTML to be placed verbatim in the &lt;head&gt;")
     
     objects = BlogManager()
     
