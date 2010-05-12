@@ -5,6 +5,7 @@ from django.conf import settings
 
 class BlogAdmin(admin.ModelAdmin):
     form = BlogForm
+    list_display = ('title', 'public')
     prepopulated_fields = {"slug": ("title",)}
     related_search_fields = {
         'owner': ('^user__username', '^first_name', '^last_name'),
@@ -25,7 +26,26 @@ class BlogAdmin(admin.ModelAdmin):
             'classes': ('collapse',),
         }),
     )
+    actions = ['make_public', 'make_not_public']
+    
+    def make_public(self, request, queryset):
+        rows_updated = queryset.update(public=True)
+        if rows_updated == 1:
+            message_bit = "1 blog was"
+        else:
+            message_bit = "%s blogs were" % rows_updated
+        self.message_user(request, "%s successfully marked as PUBLIC." % message_bit)
+    make_public.short_description = "Mark selected blogs as PUBLIC"
 
+    def make_not_public(self, request, queryset):
+        rows_updated = queryset.update(public=False)
+        if rows_updated == 1:
+            message_bit = "1 blog was"
+        else:
+            message_bit = "%s blogs were" % rows_updated
+        self.message_user(request, "%s successfully marked as NOT PUBLIC." % message_bit)
+    make_not_public.short_description = "Mark selected blogs as NOT PUBLIC"
+    
     def queryset(self, request):
         qs = super(BlogAdmin, self).queryset(request)
         if request.user.is_superuser:
