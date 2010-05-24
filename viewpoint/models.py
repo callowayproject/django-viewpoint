@@ -117,7 +117,7 @@ class Entry(models.Model):
     objects = EntryManager()
     
     class Meta:
-        #unique_together = ('slug','pub_date')
+        unique_together = ('slug','pub_date')
         verbose_name_plural = _('Entries')
         get_latest_by = 'update_date'
         
