@@ -6,9 +6,11 @@ from django.conf import settings
 class BlogAdmin(admin.ModelAdmin):
     form = BlogForm
     prepopulated_fields = {"slug": ("title",)}
+    list_display = ('title', 'public', 'entry_count',)
     related_search_fields = {
         'owner': ('^user__username', '^first_name', '^last_name'),
     }
+    
     fieldsets = (
         (None, {
             'fields': ('title', 'tease', 'photo'),
@@ -25,6 +27,16 @@ class BlogAdmin(admin.ModelAdmin):
             'classes': ('collapse',),
         }),
     )
+    def entry_count(self, obj):
+        """Return a count of entries and a link to view them"""
+        count = obj.entry_set.count()
+        if count == 1:
+            item = '%d entry <a href="../entry/?blog__id__exact=%s">View</a>' % (count, obj.id)
+        else:
+            item = '%d entries <a href="../entry/?blog__id__exact=%s">View</a>' % (count, obj.id)
+        return item
+    entry_count.allow_tags = True
+    
     if HAS_CATEGORIES:
         fieldsets[-1][1]['fields'] += ('category',)
 
@@ -49,6 +61,7 @@ class EntryAdmin(admin.ModelAdmin):
     form = EntryForm
     prepopulated_fields = {"slug": ("title",)}
     exclude = ['approved']
+    date_hierarchy = 'pub_date'
     list_display = ('title', 'pub_date','blog', 'public', 'approved')
     related_search_fields = {
         'author': ('^user__username', '^first_name', '^last_name'),
