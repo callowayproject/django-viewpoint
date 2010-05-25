@@ -117,9 +117,10 @@ class Entry(models.Model):
     objects = EntryManager()
     
     class Meta:
-        unique_together = ('slug','pub_date')
+        unique_together = ('blog','slug','pub_date')
         verbose_name_plural = _('Entries')
         get_latest_by = 'update_date'
+        ordering = ('-pub_date', '-pub_time',)
         
     def __unicode__(self):
         return self.title
