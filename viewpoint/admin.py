@@ -5,6 +5,7 @@ from django.conf import settings
 
 class BlogAdmin(admin.ModelAdmin):
     form = BlogForm
+    list_display = ('title', 'public')
     prepopulated_fields = {"slug": ("title",)}
     list_display = ('title', 'public', 'entry_count',)
     related_search_fields = {
@@ -27,6 +28,10 @@ class BlogAdmin(admin.ModelAdmin):
             'classes': ('collapse',),
         }),
     )
+    if HAS_CATEGORIES:
+        fieldsets[-1][1]['fields'] += ('category',)
+    
+    
     def entry_count(self, obj):
         """Return a count of entries and a link to view them"""
         count = obj.entry_set.count()
@@ -36,10 +41,26 @@ class BlogAdmin(admin.ModelAdmin):
             item = '%d entries <a href="../entry/?blog__id__exact=%s">View</a>' % (count, obj.id)
         return item
     entry_count.allow_tags = True
+    actions = ['make_public', 'make_not_public']
     
-    if HAS_CATEGORIES:
-        fieldsets[-1][1]['fields'] += ('category',)
+    def make_public(self, request, queryset):
+        rows_updated = queryset.update(public=True)
+        if rows_updated == 1:
+            message_bit = "1 blog was"
+        else:
+            message_bit = "%s blogs were" % rows_updated
+        self.message_user(request, "%s successfully marked as PUBLIC." % message_bit)
+    make_public.short_description = "Mark selected blogs as PUBLIC"
 
+    def make_not_public(self, request, queryset):
+        rows_updated = queryset.update(public=False)
+        if rows_updated == 1:
+            message_bit = "1 blog was"
+        else:
+            message_bit = "%s blogs were" % rows_updated
+        self.message_user(request, "%s successfully marked as NOT PUBLIC." % message_bit)
+    make_not_public.short_description = "Mark selected blogs as NOT PUBLIC"
+    
     def queryset(self, request):
         qs = super(BlogAdmin, self).queryset(request)
         if request.user.is_superuser:

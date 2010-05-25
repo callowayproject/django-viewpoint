@@ -93,6 +93,7 @@ class EntryManager(models.Manager):
             kwargs.update(approved=True,public=True)
         else:
             kwargs.update(public=True)
+        kwargs.update(pub_date__lte=datetime.date.today(), pub_time__lte=datetime.datetime.now().time())
         return self.filter(**kwargs)
 
 class Entry(models.Model):
@@ -117,7 +118,7 @@ class Entry(models.Model):
     objects = EntryManager()
     
     class Meta:
-        unique_together = ('blog','slug','pub_date')
+        unique_together = ('blog','pub_date','slug')
         verbose_name_plural = _('Entries')
         get_latest_by = 'update_date'
         ordering = ('-pub_date', '-pub_time',)

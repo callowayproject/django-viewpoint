@@ -8,7 +8,7 @@ from models import Blog, Entry
 
 def generic_blog_entry_view(request, *args,  **kwargs):
     blog_slug = kwargs.pop('blog_slug')
-    queryset = Entry.objects.filter(blog__slug=blog_slug)
+    queryset = Entry.objects.published(blog__slug=blog_slug)
     params = {
         'queryset': queryset,
         'date_field': 'pub_date'
@@ -56,7 +56,7 @@ urlpatterns += patterns('',
     url(
         regex = r'^(?P<slug>[-\w]+)/$', 
         view = 'django.views.generic.list_detail.object_detail',
-        kwargs = {'queryset': Blog.objects.filter(public=True),},
+        kwargs = {'queryset': Blog.objects.published(),},
         name='viewpoint_blog_detail'
     ),
     # Listing of blog entries for a given year
