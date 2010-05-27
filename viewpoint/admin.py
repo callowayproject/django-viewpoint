@@ -1,4 +1,4 @@
-from models import Blog, Entry, HAS_CATEGORIES
+from models import Blog, Entry, HAS_CATEGORIES, AuthorModel
 from forms import BlogForm, EntryForm
 from django.contrib import admin
 from django.conf import settings
@@ -66,7 +66,11 @@ class BlogAdmin(admin.ModelAdmin):
         if request.user.is_superuser:
             return qs
         else:
-            return request.user.blog_set.all()
+            if AuthorModel.__name__ == "StaffMember":
+                return Blog.objects.filter(
+                    owners__in=AuthorModel.objects.filter(
+                        user__pk=request.user.pk))
+            return Blog.objects.filter(owners__in=[request.user,])
         return []
 
 
@@ -98,11 +102,19 @@ class EntryAdmin(admin.ModelAdmin):
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if not request.user.is_superuser:
             if db_field.name == "author":
-                from django.contrib.auth.models import User
-                kwargs["queryset"] = User.objects.filter(pk=request.user.pk)
+                if AuthorModel.__name__ == "StaffMember":
+                    kwargs["queryset"] = AuthorModel.objects.filter(user__pk=request.user.pk)
+                else:
+                    from django.contrib.auth.models import User
+                    kwargs["queryset"] = User.objects.filter(pk=request.user.pk)
                 return db_field.formfield(**kwargs)
             elif db_field.name == "blog":
-                kwargs["queryset"] = request.user.blog_set.all()
+                if AuthorModel.__name__ == "StaffMember":
+                    kwargs["queryset"] = Blog.objects.filter(
+                        owners__in=AuthorModel.objects.filter(
+                            user__pk=request.user.pk))
+                else:
+                    kwargs["queryset"] = Blog.objects.filter(owners__in=[request.user,])
                 return db_field.formfield(**kwargs)
         return super(EntryAdmin, self).formfield_for_foreignkey(db_field, request, **kwargs)
     
@@ -148,6 +160,10 @@ class EntryAdmin(admin.ModelAdmin):
         if request.user.is_superuser:
             return qs
         else:
+            if AuthorModel.__name__ == "StaffMember":
+                return qs.filter(
+                    author__pk=AuthorModel.objects.filter(
+                        user__pk=request.user.pk))
             return qs.filter(author__pk=request.user.pk)
     
     # def save_model(self, request, obj, form, change):
