@@ -93,7 +93,7 @@ class EntryManager(models.Manager):
             kwargs.update(approved=True,public=True)
         else:
             kwargs.update(public=True)
-        kwargs.update(pub_date__lte=datetime.date.today(), pub_time__lte=datetime.datetime.now().time())
+        kwargs.update(pub_date__lte=datetime.date.today())
         return self.filter(**kwargs)
 
 class Entry(models.Model):
