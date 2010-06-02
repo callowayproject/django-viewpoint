@@ -7,7 +7,7 @@ class BlogAdmin(admin.ModelAdmin):
     form = BlogForm
     list_display = ('title', 'public')
     prepopulated_fields = {"slug": ("title",)}
-    list_display = ('title', 'public', 'entry_count',)
+    list_display = ('title', 'public', 'active', 'entry_count',)
     related_search_fields = {
         'owner': ('^user__username', '^first_name', '^last_name'),
     }
@@ -17,7 +17,7 @@ class BlogAdmin(admin.ModelAdmin):
             'fields': ('title', 'tease', 'photo'),
         }),
         ('Ownership and Viewing', {
-            'fields': ('public', 'owners'),
+            'fields': ('public', 'active', 'owners'),
         }),
         ('Meta Data', {
             'fields': ('alternate_title', 'description', 'meta_keywords', 'meta_extra'),
