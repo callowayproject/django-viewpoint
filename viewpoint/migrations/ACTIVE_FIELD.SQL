@@ -1,0 +1,1 @@
+ALTER TABLE viewpoint_blog ADD COLUMN active boolean NOT NULL DEFAULT false;

@@ -45,6 +45,7 @@ class Blog(models.Model):
     photo = models.ImageField(null=True,blank=True,upload_to='photos/blog/%Y/%m/%d/')
     owners = models.ManyToManyField(AuthorModel, blank=True, limit_choices_to=AUTHOR_LIMIT_CHOICES)
     public = models.BooleanField(default=True)
+    active = models.BooleanField(default=False)
     creation_date = models.DateTimeField(auto_now_add=True)
     if HAS_CATEGORIES:
         category = models.ForeignKey(Category,related_name='viewpoint_categories',
