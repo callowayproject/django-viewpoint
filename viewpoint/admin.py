@@ -3,10 +3,21 @@ from forms import BlogForm, EntryForm
 from django.contrib import admin
 from django.conf import settings
 
+
+
+if hasattr(settings, 'BLOG_RELATION_MODELS'):
+    from genericcollections import *
+    from models import BlogRelation
+    
+    class InlineBlogRelation(GenericCollectionTabularInline):
+        model = BlogRelation
+
 class BlogAdmin(admin.ModelAdmin):
     form = BlogForm
     prepopulated_fields = {"slug": ("title",)}
     list_display = ('title', 'public', 'active', 'entry_count',)
+    list_filter = ('public', 'active',)
+    search_fields = ('title', 'tease',)
     related_search_fields = {
         'owner': ('^user__username', '^first_name', '^last_name'),
     }
@@ -29,6 +40,12 @@ class BlogAdmin(admin.ModelAdmin):
     )
     if HAS_CATEGORIES:
         fieldsets[-1][1]['fields'] += ('category',)
+    
+    if hasattr(settings, 'BLOG_RELATION_MODELS'):
+        inlines = (InlineBlogRelation,)
+        
+        class Media:
+            js = ("js/genericcollections.js",)
     
     
     def entry_count(self, obj):
@@ -92,11 +109,15 @@ class EntryAdmin(admin.ModelAdmin):
     }
     actions = ['make_approved', 'make_not_approved', 'make_public', 'make_not_public']
     search_fields = ('blog__title','title','tease','body')   
-    list_filter = ('blog',)
+    list_filter = ('blog','public','approved')
     raw_id_fields = ('author','blog')
     
     if hasattr(settings, 'ENTRY_RELATION_MODELS'):
         inlines = (InlineEntryRelation,)
+        
+        class Media:
+            js = ("js/genericcollections.js",)
+        
     
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if not request.user.is_superuser:
