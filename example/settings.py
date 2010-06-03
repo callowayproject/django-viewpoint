@@ -84,4 +84,7 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'viewpoint',
     'django.contrib.comments',
+    'django.contrib.flatpages',
 )
+
+BLOG_RELATION_MODELS = ('flatpages.flatpage',)

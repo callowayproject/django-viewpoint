@@ -5,7 +5,7 @@ from django.template.defaultfilters import slugify
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 
-from viewpoint.settings import STAFF_ONLY, RELATION_MODELS, USE_APPROVAL
+from viewpoint.settings import STAFF_ONLY, ENTRY_RELATION_MODELS, USE_APPROVAL, BLOG_RELATION_MODELS
 
 import datetime
 
@@ -45,7 +45,7 @@ class Blog(models.Model):
     photo = models.ImageField(null=True,blank=True,upload_to='photos/blog/%Y/%m/%d/')
     owners = models.ManyToManyField(AuthorModel, blank=True, limit_choices_to=AUTHOR_LIMIT_CHOICES)
     public = models.BooleanField(default=True)
-    active = models.BooleanField(default=False)
+    active = models.BooleanField(default=True)
     creation_date = models.DateTimeField(auto_now_add=True)
     if HAS_CATEGORIES:
         category = models.ForeignKey(Category,related_name='viewpoint_categories',
@@ -151,11 +151,11 @@ class Entry(models.Model):
 if HAS_TAGGING:
     tagging.register(Blog)
 
-if RELATION_MODELS:
+if ENTRY_RELATION_MODELS:
     from django.contrib.contenttypes.models import ContentType
     from django.contrib.contenttypes import generic
     
-    RELATIONS = [Q(app_label=al, model=m) for al, m in [x.split('.') for x in RELATION_MODELS]]
+    RELATIONS = [Q(app_label=al, model=m) for al, m in [x.split('.') for x in ENTRY_RELATION_MODELS]]
     
     entry_relation_limits = reduce(lambda x,y: x|y, RELATIONS)
     class EntryRelation(models.Model):
@@ -172,3 +172,27 @@ if RELATION_MODELS:
             
         def __unicode__(self):
             return u"EntryRelation"
+
+if BLOG_RELATION_MODELS:
+    from django.contrib.contenttypes.models import ContentType
+    from django.contrib.contenttypes import generic
+    
+    RELATIONS = [Q(app_label=al, model=m) for al, m in [x.split('.') for x in BLOG_RELATION_MODELS]]
+    
+    blog_relation_limits = reduce(lambda x,y: x|y, RELATIONS)
+    class BlogRelation(models.Model):
+        """Related blog item"""
+        blog = models.ForeignKey(Blog)
+        content_type = models.ForeignKey(ContentType, limit_choices_to=blog_relation_limits)
+        object_id = models.PositiveIntegerField()
+        content_object = generic.GenericForeignKey('content_type', 'object_id')
+        relation_type = models.CharField(_("Relation Type"), 
+            max_length="200", 
+            blank=True, 
+            null=True,
+            help_text=_("A generic text field to tag a relation, like 'leadphoto'."))
+            
+        def __unicode__(self):
+            return u"BlogRelation"
+
+    
