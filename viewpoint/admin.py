@@ -5,13 +5,12 @@ from django.conf import settings
 
 class BlogAdmin(admin.ModelAdmin):
     form = BlogForm
-    list_display = ('title', 'public')
     prepopulated_fields = {"slug": ("title",)}
     list_display = ('title', 'public', 'active', 'entry_count',)
     related_search_fields = {
         'owner': ('^user__username', '^first_name', '^last_name'),
     }
-    
+    filter_horizontal = ('owners', )
     fieldsets = (
         (None, {
             'fields': ('title', 'tease', 'photo'),
