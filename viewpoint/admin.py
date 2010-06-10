@@ -61,6 +61,10 @@ class BlogAdmin(admin.ModelAdmin):
     
     def make_public(self, request, queryset):
         rows_updated = queryset.update(public=True)
+        for blog in queryset.all():
+            for entry in blog.entry_set.all():
+                entry.public = True
+                entry.save()
         if rows_updated == 1:
             message_bit = "1 blog was"
         else:
@@ -136,7 +140,6 @@ class EntryAdmin(admin.ModelAdmin):
                     kwargs["queryset"] = Blog.objects.filter(owners__in=[request.user,])
                 return db_field.formfield(**kwargs)
         return super(EntryAdmin, self).formfield_for_foreignkey(db_field, request, **kwargs)
-    
     
     def make_approved(self, request, queryset):
         rows_updated = queryset.update(approved=True)
