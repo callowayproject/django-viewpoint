@@ -110,7 +110,6 @@ class EntryAdmin(admin.ModelAdmin):
     actions = ['make_approved', 'make_not_approved', 'make_public', 'make_not_public']
     search_fields = ('blog__title','title','tease','body')   
     list_filter = ('blog','public','approved')
-    raw_id_fields = ('author','blog')
     
     if hasattr(settings, 'ENTRY_RELATION_MODELS'):
         inlines = (InlineEntryRelation,)
