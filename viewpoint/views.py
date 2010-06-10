@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import user_passes_test,login_required
 from django.db.models import Q
 from django.views.decorators.cache import cache_page
 from django.views.generic import date_based
+from django.template.loader import select_template
 
 from models import Blog,Entry
 import time, datetime
@@ -63,7 +64,9 @@ def entry_detail(request, blog_slug, year, month, day, slug):
 #@cache_page(3600)
 def blog_detail(request, slug):
     blog = get_object_or_404(Blog, slug=slug, public=True)
-    return render_to_response('blog/blog_detail.html', {
+    return render_to_response(select_template([
+        'blog/%s.html' % blog.slug,
+        'blog/blog_detail.html']), {
             'blog':blog,
             'entries': Entry.objects.published(blog=blog)
         }, context_instance=RequestContext(request))
