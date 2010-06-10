@@ -61,10 +61,6 @@ class BlogAdmin(admin.ModelAdmin):
     
     def make_public(self, request, queryset):
         rows_updated = queryset.update(public=True)
-        for blog in queryset.all():
-            for entry in blog.entry_set.all():
-                entry.public = True
-                entry.save()
         if rows_updated == 1:
             message_bit = "1 blog was"
         else:
