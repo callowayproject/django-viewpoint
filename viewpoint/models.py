@@ -5,7 +5,8 @@ from django.template.defaultfilters import slugify
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 
-from viewpoint.settings import STAFF_ONLY, ENTRY_RELATION_MODELS, USE_APPROVAL, BLOG_RELATION_MODELS
+from viewpoint.settings import STAFF_ONLY, ENTRY_RELATION_MODELS, USE_APPROVAL, \
+                                BLOG_RELATION_MODELS, DEFAULT_STORAGE
 
 import datetime
 
@@ -42,7 +43,11 @@ class Blog(models.Model):
     title = models.CharField(max_length=255)
     slug = models.SlugField(unique=True)
     tease = models.TextField(blank=True)
-    photo = models.ImageField(null=True,blank=True,upload_to='photos/blog/%Y/%m/%d/')
+    photo = models.ImageField(
+        null=True,
+        blank=True,
+        storage=DEFAULT_STORAGE
+        upload_to='viewpoint/blog/%Y/%m/%d/')
     owners = models.ManyToManyField(AuthorModel, blank=True, limit_choices_to=AUTHOR_LIMIT_CHOICES)
     public = models.BooleanField(default=True)
     active = models.BooleanField(default=True)
@@ -106,7 +111,11 @@ class Entry(models.Model):
     slug = models.SlugField(unique_for_date='pub_date')
     author = models.ForeignKey(AuthorModel)
     credit = models.CharField(max_length=255,blank=True,null=True)
-    photo = models.ImageField(null=True,blank=True,upload_to='photos/blog/entries/%Y/%m/%d/')
+    photo = models.ImageField(
+        null=True,
+        blank=True,
+        storage=DEFAULT_STORAGE,
+        upload_to='viewpoint/entry/%Y/%m/%d/')
     tease = models.TextField()
     body = models.TextField()
     public = models.BooleanField(default=True)
