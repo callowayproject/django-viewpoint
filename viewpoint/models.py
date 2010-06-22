@@ -4,6 +4,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.template.defaultfilters import slugify
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
+from django.core.files.storage import get_storage_class
 
 from viewpoint.settings import STAFF_ONLY, ENTRY_RELATION_MODELS, USE_APPROVAL, \
                                 BLOG_RELATION_MODELS, DEFAULT_STORAGE
@@ -33,6 +34,7 @@ AUTHOR_LIMIT_CHOICES = {}
 if STAFF_ONLY and not 'staff' in settings.INSTALLED_APPS:
     AUTHOR_LIMIT_CHOICES = {'is_staff': True}
 
+IMAGE_STORAGE = get_storage_class(DEFAULT_STORAGE)
 
 class BlogManager(models.Manager):
     def published(self, **kwargs):
@@ -46,7 +48,7 @@ class Blog(models.Model):
     photo = models.ImageField(
         null=True,
         blank=True,
-        storage=DEFAULT_STORAGE
+        storage=IMAGE_STORAGE(),
         upload_to='viewpoint/blog/%Y/%m/%d/')
     owners = models.ManyToManyField(AuthorModel, blank=True, limit_choices_to=AUTHOR_LIMIT_CHOICES)
     public = models.BooleanField(default=True)
@@ -79,13 +81,13 @@ class Blog(models.Model):
     def __unicode__(self):
         return self.title
 
-    def save(self, *a, **kw):
+    def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = slugify(self.title)[:50]
         for entry in self.entry_set.all():
             entry.public = self.public
             entry.save()
-        super(Blog, self).save(*a, **kw)
+        super(Blog, self).save(*args, **kwargs)
 
     @models.permalink
     def get_absolute_url(self):
@@ -114,7 +116,7 @@ class Entry(models.Model):
     photo = models.ImageField(
         null=True,
         blank=True,
-        storage=DEFAULT_STORAGE,
+        storage=IMAGE_STORAGE(),
         upload_to='viewpoint/entry/%Y/%m/%d/')
     tease = models.TextField()
     body = models.TextField()
