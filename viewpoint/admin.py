@@ -3,7 +3,7 @@ from forms import BlogForm, EntryForm
 from django.contrib import admin
 from django.conf import settings
 
-
+from viewpoint.settings import USE_APPROVAL
 
 if hasattr(settings, 'BLOG_RELATION_MODELS'):
     from genericcollections import *
@@ -17,6 +17,7 @@ class BlogAdmin(admin.ModelAdmin):
     prepopulated_fields = {"slug": ("title",)}
     list_display = ('title', 'public', 'active', 'entry_count',)
     list_filter = ('public', 'active',)
+    list_editable = ('public', 'active',)
     search_fields = ('title', 'tease',)
     related_search_fields = {
         'owner': ('^user__username', '^first_name', '^last_name'),
@@ -108,8 +109,15 @@ class EntryAdmin(admin.ModelAdmin):
         'author': ('^user__username', '^first_name', '^last_name'),
     }
     actions = ['make_approved', 'make_not_approved', 'make_public', 'make_not_public']
-    search_fields = ('blog__title','title','tease','body')   
-    list_filter = ('blog','public','approved')
+    search_fields = ('blog__title','title','tease','body')
+    if USE_APPROVAL:
+        list_filter = ('blog','public','approved')
+    else:
+        list_filter = ('blog','public',)
+    if USE_APPROVAL:
+        list_editable = ('public', 'approved')
+    else:
+        list_editable = ('public',)
     
     if hasattr(settings, 'ENTRY_RELATION_MODELS'):
         inlines = (InlineEntryRelation,)
