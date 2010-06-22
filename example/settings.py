@@ -88,3 +88,5 @@ INSTALLED_APPS = (
 )
 
 BLOG_RELATION_MODELS = ('flatpages.flatpage',)
+
+#VIEWPOINT_DEFAULT_STORAGE = 'media_storage.MediaStorage'
