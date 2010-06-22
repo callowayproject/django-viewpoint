@@ -78,7 +78,7 @@ class Blog(models.Model):
         if not self.slug:
             self.slug = slugify(self.title)[:50]
         for entry in self.entry_set.all():
-            entry.public = blog.public
+            entry.public = self.public
             entry.save()
         super(Blog, self).save(*a, **kw)
 
