@@ -18,19 +18,24 @@ def generic_blog_entry_view(request, *args,  **kwargs):
         params['template_name'] = select_template(('viewpoint/%s/entry_detail.html' % blog_slug, 'viewpoint/entry_detail.html')).name
         return object_detail(request, **params)
     elif 'day' in kwargs.keys():
-        params['template_name'] = select_template(('viewpoint/%s/entry_archive_day.html' % blog_slug, 'viewpoint/entry_archive_day.html')).name
+        if 'template_name' not in params.keys():
+            params['template_name'] = select_template(('viewpoint/%s/entry_archive_day.html' % blog_slug, 'viewpoint/entry_archive_day.html')).name
         return archive_day(request, **params)
     elif 'month' in kwargs.keys():
-        params['template_name'] = select_template(('viewpoint/%s/entry_archive_month.html' % blog_slug, 'viewpoint/entry_archive_month.html')).name
+        if 'template_name' not in params.keys():
+            params['template_name'] = select_template(('viewpoint/%s/entry_archive_month.html' % blog_slug, 'viewpoint/entry_archive_month.html')).name
         return archive_month(request, **params)
     elif 'week' in kwargs.keys():
-        params['template_name'] = select_template(('viewpoint/%s/entry_archive_week.html' % blog_slug, 'viewpoint/entry_archive_week.html')).name
+        if 'template_name' not in params.keys():
+            params['template_name'] = select_template(('viewpoint/%s/entry_archive_week.html' % blog_slug, 'viewpoint/entry_archive_week.html')).name
         return archive_week(request, **params)
     elif 'year' in kwargs.keys():
-        params['template_name'] = select_template(('viewpoint/%s/entry_archive_year.html' % blog_slug, 'viewpoint/entry_archive_year.html')).name
+        if 'template_name' not in params.keys():
+            params['template_name'] = select_template(('viewpoint/%s/entry_archive_year.html' % blog_slug, 'viewpoint/entry_archive_year.html')).name
         return archive_year(request, **params)
     else:
-        params['template_name'] = select_template(('viewpoint/%s/entry_archive_today.html' % blog_slug, 'viewpoint/entry_archive_today.html')).name
+        if 'template_name' not in params.keys():
+            params['template_name'] = select_template(('viewpoint/%s/entry_archive_today.html' % blog_slug, 'viewpoint/entry_archive_today.html')).name
         return archive_today(request, **params)
 
 feeds = {
