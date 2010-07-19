@@ -14,8 +14,10 @@ def generic_blog_entry_view(request, *args,  **kwargs):
         'date_field': 'pub_date'
     }
     params.update(kwargs)
+    print ''
     if 'slug' in kwargs.keys():
-        params['template_name'] = select_template(('viewpoint/%s/entry_detail.html' % blog_slug, 'viewpoint/entry_detail.html')).name
+        if 'template_name' not in params.keys():
+            params['template_name'] = select_template(('viewpoint/%s/entry_detail.html' % blog_slug, 'viewpoint/entry_detail.html')).name
         return object_detail(request, **params)
     elif 'day' in kwargs.keys():
         if 'template_name' not in params.keys():
