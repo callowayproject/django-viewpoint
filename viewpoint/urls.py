@@ -1,13 +1,14 @@
-from django.views.generic.date_based import archive_day, archive_month, \
-                                            archive_year, archive_today, \
-                                            archive_week, object_detail
-from django.conf.urls.defaults import *
+"""
+URL routing for blogs, entries and feeds
+"""
+
+from django.conf.urls.defaults import patterns, url
 from django.conf import settings
 from feeds import LatestEntriesByBlog, LatestEntries #, EntryComments
-from models import Blog, Entry
+from models import Blog
 from views import generic_blog_entry_view, blog_detail
 
-feeds = {
+FEEDS = {
     'all': LatestEntries,
     'latest': LatestEntriesByBlog,
     #'comments': EntryComments,
@@ -15,11 +16,11 @@ feeds = {
 
 if 'categories' in settings.INSTALLED_APPS:
     from feeds import LatestEntriesByCategory
-    feeds['categories'] = LatestEntriesByCategory
+    FEEDS['categories'] = LatestEntriesByCategory
 
 
 urlpatterns = patterns('django.contrib.syndication.views',
-    (r'^feeds/(?P<url>.*)/$', 'feed', {'feed_dict': feeds}),
+    (r'^feeds/(?P<url>.*)/$', 'feed', {'feed_dict': FEEDS}),
 )
 
 urlpatterns += patterns('',
