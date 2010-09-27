@@ -11,62 +11,50 @@ from models import Blog,Entry
 import time, datetime
 
 
-def archive_day(request, slug, year, month, day):
-    blog = get_object_or_404(Blog, slug=slug, public=True)
-    try:
-        date = datetime.date(*time.strptime('%s-%s-%s' % (year, month, day), '%Y-%b-%d')[:3])
-    except ValueError:
-        raise Http404
-    return render_to_response('blog/entry_archive.html', {
-        'blog': 'blog',
-        'entries': Entry.objects.published(blog=blog,pub_date__year=date.year,pub_date__month=date.month,pub_date__day=date.day)
-    }, context_instance=RequestContext(request))
-    
-def archive_month(request, slug, year, month):
-    blog = get_object_or_404(Blog, slug=slug, public=True)
-    try:
-        date = datetime.date(*time.strptime('%s-%s' % (year, month), '%Y-%b')[:3])
-    except ValueError:
-        raise Http404
-    return render_to_response('blog/entry_archive.html', {
-        'blog': 'blog',
-        'month': month,
-        'year': year,
-        'entries': Entry.objects.published(blog=blog,pub_date__year=date.year,pub_date__month=date.month)
-    }, context_instance=RequestContext(request))
-    
-def archive_year(request, slug, year):
-    blog = get_object_or_404(Blog, slug=slug, public=True)
-    try:
-        date = datetime.date(*time.strptime(year, '%Y')[:3])
-    except ValueError:
-        raise Http404
-    return render_to_response('blog/entry_archive_year.html', {
-        'blog': 'blog',
-        'year': year,
-        'entries': Entry.objects.published(blog=blog,pub_date__year=date.year)
-    }, context_instance=RequestContext(request))
+def get_template(blog_slug, template_name):
+    return select_template((
+            'viewpoint/%s/%s.html' % (blog_slug, template_name), 
+            'viewpoint/%s.html' % template_name
+        )).name
 
-#@cache_page(3600)
-def entry_detail(request, blog_slug, year, month, day, slug):
-    try:
-        date = datetime.date(*time.strptime('%s-%s-%s' % (year, month, day), '%Y-%b-%d')[:3])
-    except ValueError:
-        raise Http404
-    start_date = datetime.datetime.combine(date, datetime.time.min)
-    end_date = datetime.datetime.combine(date, datetime.time.max)
-    blog = get_object_or_404(Blog, slug=blog_slug)
-    entry = get_object_or_404(Entry, pub_date__range=(start_date, end_date), slug=slug, blog=blog)
-    if entry.public or entry.author == request.user:
-        return render_to_response('blog/entry_detail.html', {'entry':entry}, context_instance=RequestContext(request))
-    raise Http404
+def generic_blog_entry_view(request, *args,  **kwargs):
+    blog_slug = kwargs.pop('blog_slug')
+    queryset = Entry.objects.published(blog__slug=blog_slug)
+    params = {
+        'queryset': queryset,
+        'date_field': 'pub_date'
+    }
+    params.update(kwargs)
+    print ''
+    if 'slug' in kwargs.keys():
+        if 'template_name' not in params.keys():
+            params['template_name'] = get_template(blog_slug, 'blog_entry')
+        return object_detail(request, **params)
+    elif 'day' in kwargs.keys():
+        if 'template_name' not in params.keys():
+            params['template_name'] = get_template(blog_slug, 'entry_archive_day')
+        return archive_day(request, **params)
+    elif 'month' in kwargs.keys():
+        if 'template_name' not in params.keys():
+            params['template_name'] = get_template(blog_slug, 'entry_archive_month')
+        return archive_month(request, **params)
+    elif 'week' in kwargs.keys():
+        if 'template_name' not in params.keys():
+            params['template_name'] = get_template(blog_slug, 'entry_archive_week')
+        return archive_week(request, **params)
+    elif 'year' in kwargs.keys():
+        if 'template_name' not in params.keys():
+            params['template_name'] = get_template(blog_slug, 'entry_archive_year')
+        return archive_year(request, **params)
+    else:
+        if 'template_name' not in params.keys():
+            params['template_name'] = get_template(blog_slug, 'entry_archive_today')
+        return archive_today(request, **params)
 
-#@cache_page(3600)
+
 def blog_detail(request, slug):
     blog = get_object_or_404(Blog, slug=slug, public=True)
-    return render_to_response(select_template([
-        'blog/%s.html' % blog.slug,
-        'blog/blog_detail.html']), {
+    return render_to_response(get_template(slug, 'blog_detail'), {
             'blog':blog,
             'entries': Entry.objects.published(blog=blog)
         }, context_instance=RequestContext(request))

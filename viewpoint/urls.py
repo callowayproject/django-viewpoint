@@ -5,40 +5,7 @@ from django.conf.urls.defaults import *
 from django.conf import settings
 from feeds import LatestEntriesByBlog, LatestEntries #, EntryComments
 from models import Blog, Entry
-from django.template.loader import select_template
-def generic_blog_entry_view(request, *args,  **kwargs):
-    blog_slug = kwargs.pop('blog_slug')
-    queryset = Entry.objects.published(blog__slug=blog_slug)
-    params = {
-        'queryset': queryset,
-        'date_field': 'pub_date'
-    }
-    params.update(kwargs)
-    print ''
-    if 'slug' in kwargs.keys():
-        if 'template_name' not in params.keys():
-            params['template_name'] = select_template(('viewpoint/%s/entry_detail.html' % blog_slug, 'viewpoint/entry_detail.html')).name
-        return object_detail(request, **params)
-    elif 'day' in kwargs.keys():
-        if 'template_name' not in params.keys():
-            params['template_name'] = select_template(('viewpoint/%s/entry_archive_day.html' % blog_slug, 'viewpoint/entry_archive_day.html')).name
-        return archive_day(request, **params)
-    elif 'month' in kwargs.keys():
-        if 'template_name' not in params.keys():
-            params['template_name'] = select_template(('viewpoint/%s/entry_archive_month.html' % blog_slug, 'viewpoint/entry_archive_month.html')).name
-        return archive_month(request, **params)
-    elif 'week' in kwargs.keys():
-        if 'template_name' not in params.keys():
-            params['template_name'] = select_template(('viewpoint/%s/entry_archive_week.html' % blog_slug, 'viewpoint/entry_archive_week.html')).name
-        return archive_week(request, **params)
-    elif 'year' in kwargs.keys():
-        if 'template_name' not in params.keys():
-            params['template_name'] = select_template(('viewpoint/%s/entry_archive_year.html' % blog_slug, 'viewpoint/entry_archive_year.html')).name
-        return archive_year(request, **params)
-    else:
-        if 'template_name' not in params.keys():
-            params['template_name'] = select_template(('viewpoint/%s/entry_archive_today.html' % blog_slug, 'viewpoint/entry_archive_today.html')).name
-        return archive_today(request, **params)
+from views import generic_blog_entry_view, blog_detail
 
 feeds = {
     'all': LatestEntries,
@@ -68,8 +35,7 @@ urlpatterns += patterns('',
     # Blog detail (Main page of a blog, shows description and stuff)
     url(
         regex = r'^(?P<slug>[-\w]+)/$', 
-        view = 'django.views.generic.list_detail.object_detail',
-        kwargs = {'queryset': Blog.objects.published(),},
+        view = blog_detail,
         name='viewpoint_blog_detail'
     ),
     # Listing of blog entries for a given year
