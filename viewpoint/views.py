@@ -55,8 +55,7 @@ def generic_blog_entry_view(request, *args,  **kwargs):
 def blog_detail(request, slug):
     blog = get_object_or_404(Blog, slug=slug, public=True)
     return render_to_response(get_template(slug, 'blog_detail'), {
-            'blog':blog,
-            'entries': Entry.objects.published(blog=blog)
+            'object':blog,
         }, context_instance=RequestContext(request))
 
    # Stop Words courtesy of http://www.dcs.gla.ac.uk/idom/ir_resources/linguistic_utils/stop_words
