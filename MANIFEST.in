@@ -1,4 +1,4 @@
-recursive-include viewpoint *.html *.txt
+recursive-include viewpoint/templates *.html *.txt
 include requirements.txt
 recursive-include doc_src *.rst *.png *.css *.html *.js
 include doc_src/Makefile

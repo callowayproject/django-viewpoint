@@ -34,7 +34,7 @@ setup(
         'Topic :: Utilities',
     ],
     packages = find_packages(),
-    install_package_data=True,
+    include_package_data=True,
     install_requires = reqs,
     dependency_links = [
         'http://opensource.washingtontimes.com/static/dist/django-categories-0.2.1.tar.gz#md5=692714a07a18493c45e575cd26b07b09'
