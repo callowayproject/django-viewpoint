@@ -6,9 +6,10 @@ from django.contrib import admin
 admin.autodiscover()
 
 urlpatterns = patterns('',
-    # Example:
-    (r'^blogs/', include('viewpoint.urls')),
-
+    # Uncomment for Multiple blogs
+    #(r'^blogs/', include('viewpoint.urls')),
+    #Uncomment for One blog
+    (r'^blogs/', include('viewpoint.single_urls')),
     # Uncomment the admin/doc line below and add 'django.contrib.admindocs' 
     # to INSTALLED_APPS to enable admin documentation:
     # (r'^admin/doc/', include('django.contrib.admindocs.urls')),
