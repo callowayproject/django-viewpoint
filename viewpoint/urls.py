@@ -4,17 +4,17 @@ URL routing for blogs, entries and feeds
 
 from django.conf.urls.defaults import patterns, url
 from django.conf import settings
-from feeds import LatestEntriesByBlog, LatestEntries #, EntryComments
+from feeds import LatestEntriesByBlog, LatestEntries
 from models import Blog
 from views import generic_blog_entry_view, blog_detail
+from viewpoint.settings import USE_CATEGORIES
 
 FEEDS = {
     'all': LatestEntries,
     'latest': LatestEntriesByBlog,
-    #'comments': EntryComments,
 }
 
-if 'categories' in settings.INSTALLED_APPS:
+if USE_CATEGORIES and 'categories' in settings.INSTALLED_APPS:
     from feeds import LatestEntriesByCategory
     FEEDS['categories'] = LatestEntriesByCategory
 
