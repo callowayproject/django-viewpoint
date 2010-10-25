@@ -1,33 +1,40 @@
 from django.db import models
 from django.db.models import Q
+from django.db.models.loading import get_model
 from django.utils.translation import ugettext_lazy as _
 from django.template.defaultfilters import slugify
 from django.conf import settings
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist, ImproperlyConfigured
 from django.core.files.storage import get_storage_class
 
-from viewpoint.settings import STAFF_ONLY, ENTRY_RELATION_MODELS, USE_APPROVAL, \
-                                BLOG_RELATION_MODELS, DEFAULT_STORAGE
+from viewpoint.settings import (STAFF_ONLY, ENTRY_RELATION_MODELS, USE_APPROVAL,
+                                BLOG_RELATION_MODELS, DEFAULT_STORAGE,
+                                USE_CATEGORIES, USE_TAGGING, AUTHOR_MODEL, 
+                                DEFAULT_BLOG)
+
+if BLOG_RELATION_MODELS or ENTRY_RELATION_MODELS:
+    from django.contrib.contenttypes.models import ContentType
+    from django.contrib.contenttypes import generic
 
 import datetime
 
-if 'tagging' in settings.INSTALLED_APPS:
+if USE_TAGGING and 'tagging' in settings.INSTALLED_APPS:
     import tagging
     from tagging.fields import TagField
     HAS_TAGGING = True
 else:
     HAS_TAGGING = False
 
-if 'categories' in settings.INSTALLED_APPS:
+if USE_CATEGORIES and 'categories' in settings.INSTALLED_APPS:
     from categories.models import Category
     HAS_CATEGORIES = True
 else:
     HAS_CATEGORIES = False
 
-if 'staff' in settings.INSTALLED_APPS:
-    from staff.models import StaffMember as AuthorModel
-else:
-    from django.contrib.auth.models import User as AuthorModel
+AuthorModel = get_model(*AUTHOR_MODEL.split('.'))
+if not AuthorModel:
+    raise ImproperlyConfigured("The VIEWPOINT_AUTHOR_MODEL (%s) " + \
+                                "isn't installed" % AUTHOR_MODEL)
 
 AUTHOR_LIMIT_CHOICES = {}
 
@@ -37,11 +44,20 @@ if STAFF_ONLY and not 'staff' in settings.INSTALLED_APPS:
 IMAGE_STORAGE = get_storage_class(DEFAULT_STORAGE)
 
 class BlogManager(models.Manager):
+    """
+    Manager for Blogs that allow you to select just the blogs that are public.
+    """
     def published(self, **kwargs):
+        """
+        Show only the blogs that are public.
+        """
         kwargs.update(public=True)
         return self.filter(**kwargs)
 
 class Blog(models.Model):
+    """
+    A Collection of writings by a user or set of users
+    """
     title = models.CharField(max_length=255)
     slug = models.SlugField(unique=True)
     tease = models.TextField(blank=True)
@@ -50,13 +66,19 @@ class Blog(models.Model):
         blank=True,
         storage=IMAGE_STORAGE(),
         upload_to='viewpoint/blog/%Y/%m/%d/')
-    owners = models.ManyToManyField(AuthorModel, blank=True, limit_choices_to=AUTHOR_LIMIT_CHOICES)
+    owners = models.ManyToManyField(
+        AuthorModel, 
+        blank=True, 
+        limit_choices_to=AUTHOR_LIMIT_CHOICES)
     public = models.BooleanField(default=True)
     active = models.BooleanField(default=True)
     creation_date = models.DateTimeField(auto_now_add=True)
     if HAS_CATEGORIES:
-        category = models.ForeignKey(Category,related_name='viewpoint_categories',
-                                        blank=True,null=True)
+        category = models.ForeignKey(
+            Category,
+            related_name='viewpoint_categories',
+            blank=True,
+            null=True)
     alternate_title = models.CharField(
         blank=True,
         default="",
@@ -91,6 +113,9 @@ class Blog(models.Model):
 
     @models.permalink
     def get_absolute_url(self):
+        """
+        Return the url for this blog
+        """
         return ('viewpoint_blog_detail', None, {'slug': self.slug})
         
     class Meta:
@@ -99,20 +124,32 @@ class Blog(models.Model):
 
 
 class EntryManager(models.Manager):
+    """
+    Manager for Entries that allow you to select just the published entries.
+    """
     def published(self, **kwargs):
+        """
+        Return the published entries only
+        """
         if USE_APPROVAL:
-            kwargs.update(approved=True,public=True)
+            kwargs.update(approved=True, public=True)
         else:
             kwargs.update(public=True)
         kwargs.update(pub_date__lte=datetime.date.today())
         return self.filter(**kwargs)
 
 class Entry(models.Model):
+    """
+    An Entry for a Blog
+    """
     blog = models.ForeignKey(Blog)
     title = models.CharField(max_length=255)
     slug = models.SlugField(unique_for_date='pub_date')
     author = models.ForeignKey(AuthorModel)
-    credit = models.CharField(max_length=255,blank=True,null=True)
+    credit = models.CharField(
+        max_length=255, 
+        blank=True, 
+        null=True)
     photo = models.ImageField(
         null=True,
         blank=True,
@@ -126,14 +163,17 @@ class Entry(models.Model):
     pub_time = models.TimeField(auto_now_add=True)
     update_date = models.DateTimeField(auto_now=True)
     if HAS_CATEGORIES:
-        category = models.ForeignKey(Category,related_name='entry_categories',
-                                        blank=True,null=True)
+        category = models.ForeignKey(
+            Category,
+            related_name='entry_categories',
+            blank=True,
+            null=True)
     if HAS_TAGGING:
         tags = TagField(blank=True, null=True)
     objects = EntryManager()
     
     class Meta:
-        unique_together = ('blog','pub_date','slug')
+        unique_together = ('blog', 'pub_date', 'slug')
         verbose_name_plural = _('Entries')
         get_latest_by = 'update_date'
         ordering = ('-pub_date', '-pub_time',)
@@ -154,28 +194,40 @@ class Entry(models.Model):
 
     @models.permalink
     def get_absolute_url(self):
-        return ('viewpoint_entry_detail', None, {
-            'blog_slug': self.blog.slug,
-            'year': self.pub_date.year,
-            'month': self.pub_date.strftime('%b').lower(),
-            'day': self.pub_date.day,
-            'slug': self.slug
-        })
+        """
+        Return the url to the blog entry. URL depends whether or not the
+        default blog is specified.
+        """
+        if DEFAULT_BLOG:
+            kwargs = {
+                'year': self.pub_date.year,
+                'month': self.pub_date.strftime('%b').lower(),
+                'day': self.pub_date.day,
+                'slug': self.slug
+            }
+        else:
+            kwargs = {
+                'blog_slug': self.blog.slug,
+                'year': self.pub_date.year,
+                'month': self.pub_date.strftime('%b').lower(),
+                'day': self.pub_date.day,
+                'slug': self.slug
+            }
+        return ('viewpoint_entry_detail', None, kwargs)
 
 if HAS_TAGGING:
     tagging.register(Blog)
 
 if ENTRY_RELATION_MODELS:
-    from django.contrib.contenttypes.models import ContentType
-    from django.contrib.contenttypes import generic
-    
     RELATIONS = [Q(app_label=al, model=m) for al, m in [x.split('.') for x in ENTRY_RELATION_MODELS]]
     
-    entry_relation_limits = reduce(lambda x,y: x|y, RELATIONS)
+    ENTRY_RELATION_LIMITS = reduce(lambda x, y: x|y, RELATIONS)
     class EntryRelation(models.Model):
         """Related entry item"""
         entry = models.ForeignKey(Entry)
-        content_type = models.ForeignKey(ContentType, limit_choices_to=entry_relation_limits)
+        content_type = models.ForeignKey(
+            ContentType, 
+            limit_choices_to=ENTRY_RELATION_LIMITS)
         object_id = models.PositiveIntegerField()
         content_object = generic.GenericForeignKey('content_type', 'object_id')
         relation_type = models.CharField(_("Relation Type"), 
@@ -188,16 +240,15 @@ if ENTRY_RELATION_MODELS:
             return u"EntryRelation"
 
 if BLOG_RELATION_MODELS:
-    from django.contrib.contenttypes.models import ContentType
-    from django.contrib.contenttypes import generic
-    
     RELATIONS = [Q(app_label=al, model=m) for al, m in [x.split('.') for x in BLOG_RELATION_MODELS]]
     
-    blog_relation_limits = reduce(lambda x,y: x|y, RELATIONS)
+    BLOG_RELATION_LIMITS = reduce(lambda x, y: x|y, RELATIONS)
     class BlogRelation(models.Model):
         """Related blog item"""
         blog = models.ForeignKey(Blog)
-        content_type = models.ForeignKey(ContentType, limit_choices_to=blog_relation_limits)
+        content_type = models.ForeignKey(
+            ContentType, 
+            limit_choices_to=BLOG_RELATION_LIMITS)
         object_id = models.PositiveIntegerField()
         content_object = generic.GenericForeignKey('content_type', 'object_id')
         relation_type = models.CharField(_("Relation Type"), 
