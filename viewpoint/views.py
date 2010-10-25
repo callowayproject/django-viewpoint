@@ -2,6 +2,7 @@ from django.template import RequestContext
 from django.shortcuts import render_to_response, get_object_or_404
 from django.db.models import Q
 from django.template.loader import select_template
+from viewpoint.settings import DEFAULT_BLOG
 from django.views.generic.date_based import archive_day, archive_month, \
                                             archive_year, archive_today, \
                                             archive_week, object_detail
@@ -22,7 +23,7 @@ def generic_blog_entry_view(request, *args,  **kwargs):
     """
     A generic override for the default Django generic views 
     """
-    blog_slug = kwargs.pop('blog_slug')
+    blog_slug = kwargs.pop('blog_slug', DEFAULT_BLOG)
     queryset = Entry.objects.published(blog__slug=blog_slug)
     params = {
         'queryset': queryset,
@@ -56,7 +57,7 @@ def generic_blog_entry_view(request, *args,  **kwargs):
         return archive_today(request, **params)
 
 
-def blog_detail(request, slug):
+def blog_detail(request, slug=DEFAULT_BLOG):
     """
     Return the blog_detail page for the specified blog.
     """
