@@ -14,7 +14,7 @@ FEEDS = {
     'latest': LatestEntries,
 }
 
-if 'categories' in settings.INSTALLED_APPS:
+if USE_CATEGORIES and 'categories' in settings.INSTALLED_APPS:
     from feeds import LatestEntriesByCategory
     FEEDS['categories'] = LatestEntriesByCategory
 
