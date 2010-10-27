@@ -2,7 +2,7 @@ from django.template import RequestContext
 from django.shortcuts import render_to_response, get_object_or_404
 from django.db.models import Q
 from django.template.loader import select_template
-from viewpoint.settings import DEFAULT_BLOG
+from viewpoint.settings import DEFAULT_BLOG, MONTH_FORMAT
 from django.views.generic.date_based import archive_day, archive_month, \
                                             archive_year, archive_today, \
                                             archive_week, object_detail
@@ -27,21 +27,26 @@ def generic_blog_entry_view(request, *args,  **kwargs):
     queryset = Entry.objects.published(blog__slug=blog_slug)
     params = {
         'queryset': queryset,
-        'date_field': 'pub_date'
+        'date_field': 'pub_date',
+        'allow_empty': True,
     }
     params.update(kwargs)
     print ''
     if 'slug' in kwargs.keys():
         if 'template_name' not in params.keys():
             params['template_name'] = get_template(blog_slug, 'entry_detail')
+            params['month_format'] = MONTH_FORMAT
+            params.pop('allow_empty')
         return object_detail(request, **params)
     elif 'day' in kwargs.keys():
         if 'template_name' not in params.keys():
             params['template_name'] = get_template(blog_slug, 'entry_archive_day')
+            params['month_format'] = MONTH_FORMAT
         return archive_day(request, **params)
     elif 'month' in kwargs.keys():
         if 'template_name' not in params.keys():
             params['template_name'] = get_template(blog_slug, 'entry_archive_month')
+            params['month_format'] = MONTH_FORMAT
         return archive_month(request, **params)
     elif 'week' in kwargs.keys():
         if 'template_name' not in params.keys():
@@ -57,12 +62,12 @@ def generic_blog_entry_view(request, *args,  **kwargs):
         return archive_today(request, **params)
 
 
-def blog_detail(request, slug=DEFAULT_BLOG):
+def blog_detail(request, blog_slug=DEFAULT_BLOG):
     """
     Return the blog_detail page for the specified blog.
     """
-    blog = get_object_or_404(Blog, slug=slug, public=True)
-    return render_to_response(get_template(slug, 'blog_detail'), {
+    blog = get_object_or_404(Blog, slug=blog_slug, public=True)
+    return render_to_response(get_template(blog_slug, 'blog_detail'), {
             'object':blog,
         }, context_instance=RequestContext(request))
 

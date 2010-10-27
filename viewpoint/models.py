@@ -10,7 +10,7 @@ from django.core.files.storage import get_storage_class
 from viewpoint.settings import (STAFF_ONLY, ENTRY_RELATION_MODELS, USE_APPROVAL,
                                 BLOG_RELATION_MODELS, DEFAULT_STORAGE,
                                 USE_CATEGORIES, USE_TAGGING, AUTHOR_MODEL, 
-                                DEFAULT_BLOG)
+                                DEFAULT_BLOG, MONTH_FORMAT)
 
 if BLOG_RELATION_MODELS or ENTRY_RELATION_MODELS:
     from django.contrib.contenttypes.models import ContentType
@@ -201,7 +201,7 @@ class Entry(models.Model):
         if DEFAULT_BLOG:
             kwargs = {
                 'year': self.pub_date.year,
-                'month': self.pub_date.strftime('%b').lower(),
+                'month': self.pub_date.strftime(MONTH_FORMAT).lower(),
                 'day': self.pub_date.day,
                 'slug': self.slug
             }
@@ -209,12 +209,19 @@ class Entry(models.Model):
             kwargs = {
                 'blog_slug': self.blog.slug,
                 'year': self.pub_date.year,
-                'month': self.pub_date.strftime('%b').lower(),
+                'month': self.pub_date.strftime(MONTH_FORMAT).lower(),
                 'day': self.pub_date.day,
                 'slug': self.slug
             }
         return ('viewpoint_entry_detail', None, kwargs)
-
+    #
+    if ENTRY_RELATION_MODELS:
+        def get_related_content_type(self, content_type):
+            return self.entryrelation_set.filter(content_type__name=content_type)
+        
+        def get_relation_type(self, relation_type):
+            return self.entryrelation_set.filter(relation_type=relation_type)
+    
 if HAS_TAGGING:
     tagging.register(Blog)
 
