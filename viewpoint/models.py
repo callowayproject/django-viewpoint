@@ -116,7 +116,7 @@ class Blog(models.Model):
         """
         Return the url for this blog
         """
-        return ('viewpoint_blog_detail', None, {'slug': self.slug})
+        return ('viewpoint_blog_detail', None, {'blog_slug': self.slug})
         
     class Meta:
         ordering = ('title',)
