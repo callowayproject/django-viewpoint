@@ -182,15 +182,22 @@ class EntryAdmin(admin.ModelAdmin):
     make_not_public.short_description = "Mark selected entries as NOT PUBLIC"
     
     def queryset(self, request):
+        from django.db.models import Q
+        
         qs = super(EntryAdmin, self).queryset(request)
         if request.user.is_superuser:
             return qs
         else:
             if AuthorModel.__name__ == "StaffMember":
-                return qs.filter(
-                    author__pk=AuthorModel.objects.filter(
-                        user__pk=request.user.pk))
-            return qs.filter(author__pk=request.user.pk)
+                blog_ids = Blog.objects.filter(
+                    owners__in=AuthorModel.objects.filter(
+                        user__pk=request.user.pk)).values_list('pk', flat=True)
+                author_pk = AuthorModel.objects.filter(user__pk=request.user.pk)
+            else:
+                blog_ids = Blog.objects.filter(
+                    owners__in=[request.user.pk,]).values_list('pk', flat=True)
+                author_pk = request.user.pk
+            return qs.filter(Q(blog__id__in=blog_ids) | Q(author__pk=author_pk))
     
     # def save_model(self, request, obj, form, change):
     #     obj.author = request.user
