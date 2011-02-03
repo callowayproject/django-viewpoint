@@ -24,14 +24,17 @@ def generic_blog_entry_view(request, *args,  **kwargs):
     A generic override for the default Django generic views 
     """
     blog_slug = kwargs.pop('blog_slug', DEFAULT_BLOG)
-    queryset = Entry.objects.published(blog__slug=blog_slug)
+    if request.user.is_staff:
+        queryset = Entry.objects.filter(blog__slug=blog_slug)
+    else:
+        queryset = Entry.objects.published(blog__slug=blog_slug)
     params = {
         'queryset': queryset,
         'date_field': 'pub_date',
         'allow_empty': True,
     }
     params.update(kwargs)
-    print ''
+    
     if 'slug' in kwargs.keys():
         if 'template_name' not in params.keys():
             params['template_name'] = get_template(blog_slug, 'entry_detail')
