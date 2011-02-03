@@ -63,7 +63,7 @@ urlpatterns += patterns('',
     ),
     # Listing of blog entries for the current date
     url(
-        regex = r'^%stoday/$' % URL_REGEXES['blog'], 
+        regex = r'%stoday/$' % URL_REGEXES['blog'], 
         view = generic_blog_entry_view, 
         name='viewpoint_blog_archive_today'
     ),
@@ -75,17 +75,21 @@ urlpatterns += patterns('',
     ),
     # A blog comments page
     url(
-        regex = r'^%scomments/$' % URL_REGEXES['entry'], 
+        regex = r'%scomments/$' % URL_REGEXES['entry'], 
         view = generic_blog_entry_view,
         kwargs = {'template_name':'viewpoint/entry_comments.html'},
         name='viewpoint_entry_comments'
     ),
     # A blog printing page
     url(
-        regex = r'^%sprint/$' % URL_REGEXES['entry'], 
+        regex = r'%sprint/$' % URL_REGEXES['entry'], 
         view = generic_blog_entry_view, 
         kwargs = {'template_name':'viewpoint/entry_print.html'},
         name='viewpoint_entry_print'
     ),
-    
+    url(
+        regex= r'xmlrpc/$', 
+        view = 'django_xmlrpc.views.handle_xmlrpc', 
+        name = 'viewpoint_xmlrpc'
+    ),
 )

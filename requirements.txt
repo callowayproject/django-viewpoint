@@ -2,3 +2,4 @@
 #django-tagging
 #django-categories
 #django-tinymce
+django-xmlrpc
