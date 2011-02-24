@@ -106,7 +106,6 @@ def LatestEntriesByBlog(feed_title=None, feed_description=None,
 
     class _LatestEntriesByBlog(Feed):
         def get_object(self, bits):
-            print bits
             if len(bits) < 1 and DEFAULT_BLOG == '':
                 return Blog.objects.all()[0]
             if DEFAULT_BLOG != '':
