@@ -1,0 +1,244 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Settings &mdash; Viewpoint v0.7.5 documentation</title>
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.7.5',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="Viewpoint v0.7.5 documentation" href="../index.html" />
+    <link rel="up" title="Reference" href="index.html" />
+    <link rel="prev" title="Reference" href="index.html" /> 
+  </head>
+  <body>
+<div id="docstitle">
+	<p>Viewpoint v0.7.5 documentation</p>
+</div>
+<div id="header">
+	<div id="title"><h1>Settings</h1></div>
+	<ul id="headerButtons">
+		<li id="toc_button"><div class="headerButton"><a href="#">Table of Contents</a></div></li>
+		<li id="page_buttons">
+			<div class="headerButton"><a href="../genindex.html" title="General Index" accesskey="I">index</a></div>
+			<div class="headerButton"><a href="index.html" title="Reference" accesskey="P">previous</a></div>
+		</li>
+	</ul>
+</div>
+
+<div id="sphinxsidebar">
+  <div class="sphinxsidebarwrapper">
+	<ul><li class="toctree-l1"><a href="../index.html">Main Page</a></li></ul>
+	<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="">Settings</a></li>
+</ul>
+</li>
+</ul>
+
+    <div id="searchbox" style="display: none">
+      
+        <form class="search" action="../search.html" method="get">
+			<div class="search-wrapper">
+			<span class="search-left"></span>
+			<input class="prettysearch" type="text" name="q" size="18" />
+			<span class="search-right">&nbsp;</span>
+			</div>
+          <input type="submit" value="Search" class="searchbutton" />
+          <input type="hidden" name="check_keywords" value="yes" />
+          <input type="hidden" name="area" value="default" />
+        </form>
+        <p class="searchtip" style="font-size: 90%">
+        Enter search terms or a module, class or function name.
+        </p>
+    </div>
+    <script type="text/javascript">$('#searchbox').show(0);</script>
+  </div>
+</div>
+
+
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="settings">
+<h1>Settings<a class="headerlink" href="#settings" title="Permalink to this headline">¶</a></h1>
+<p><strong>New in version 0.8:</strong> Settings have been refactored to mimic the current trend of having a dictionary of settings. The old settings will still work, but a Deprecation warning will be raised.</p>
+<div class="section" id="viewpoint-settings">
+<h2>VIEWPOINT_SETTINGS<a class="headerlink" href="#viewpoint-settings" title="Permalink to this headline">¶</a></h2>
+<p><tt class="docutils literal"><span class="pre">VIEWPOINT_SETTINGS</span></tt> is a dictionary of individual settings. You only need to include the individual settings that you wish to override from the defaults.</p>
+<p>The default settings are:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">settings</span>
+
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">15</span><span class="p">):</span>
+    <span class="k">print</span> <span class="n">i</span>
+<span class="kn">import</span> <span class="nn">settings</span>
+
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">15</span><span class="p">):</span>
+    <span class="k">print</span> <span class="n">i</span>
+
+<span class="n">VIEWPOINT_SETTINGS</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s">&#39;STAFF_ONLY&#39;</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+    <span class="s">&#39;ENTRY_RELATION_MODELS&#39;</span><span class="p">:</span> <span class="p">[],</span>
+    <span class="s">&#39;BLOG_RELATION_MODELS&#39;</span><span class="p">:</span> <span class="p">[],</span>
+    <span class="s">&#39;USE_APPROVAL&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+    <span class="s">&#39;DEFAULT_STORAGE&#39;</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">DEFAULT_FILE_STORAGE</span><span class="p">,</span>
+    <span class="s">&#39;AUTHOR_MODEL&#39;</span><span class="p">:</span> <span class="s">&#39;auth.User&#39;</span><span class="p">,</span>
+    <span class="s">&#39;USE_CATEGORIES&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+    <span class="s">&#39;USE_TAGGING&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+    <span class="s">&#39;DEFAULT_BLOG&#39;</span><span class="p">:</span> <span class="s">&#39;&#39;</span><span class="p">,</span>
+    <span class="s">&#39;MONTH_FORMAT&#39;</span><span class="p">:</span> <span class="s">r&quot;%b&quot;</span><span class="p">,</span>
+    <span class="s">&#39;URL_REGEXES&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s">&#39;blog&#39;</span><span class="p">:</span> <span class="s">r&#39;^(?P&lt;blog_slug&gt;[-\w]+)/$&#39;</span><span class="p">,</span>
+        <span class="s">&#39;year&#39;</span><span class="p">:</span> <span class="s">r&#39;^(?P&lt;blog_slug&gt;[-\w]+)/(?P&lt;year&gt;\d{4})/$&#39;</span><span class="p">,</span>
+        <span class="s">&#39;month&#39;</span><span class="p">:</span> <span class="s">r&#39;^(?P&lt;blog_slug&gt;[-\w]+)/(?P&lt;year&gt;\d{4})/(?P&lt;month&gt;%b)/$&#39;</span><span class="p">,</span>
+        <span class="s">&#39;day&#39;</span><span class="p">:</span> <span class="s">r&#39;^(?P&lt;blog_slug&gt;[-\w]+)/(?P&lt;year&gt;\d{4})/(?P&lt;month&gt;%b)/(?P&lt;day&gt;\d{1,2})/$&#39;</span><span class="p">,</span>
+        <span class="s">&#39;entry&#39;</span><span class="p">:</span> <span class="s">r&#39;^(?P&lt;blog_slug&gt;[-\w]+)/(?P&lt;year&gt;\d{4})/(?P&lt;month&gt;%b)/(?P&lt;day&gt;\d{1,2})/(?P&lt;slug&gt;[-\w]+)/$&#39;</span><span class="p">,</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="staff-only">
+<h2>STAFF_ONLY<a class="headerlink" href="#staff-only" title="Permalink to this headline">¶</a></h2>
+<p>Should only users marked as &#8220;is_staff&#8221; are allowed to post to a blog. The owners list is narrowed down to only these users if true.</p>
+<p><strong>Default:</strong> <tt class="xref docutils literal"><span class="pre">True</span></tt></p>
+</div>
+<div class="section" id="entry-relation-models">
+<h2>ENTRY_RELATION_MODELS<a class="headerlink" href="#entry-relation-models" title="Permalink to this headline">¶</a></h2>
+<p>A list of strings in <tt class="docutils literal"><span class="pre">'app.Model'</span></tt> format. Authors can relate any instance of these models to any blog entry. For example: to show related blog entries you would set it to <tt class="docutils literal"><span class="pre">['viewpoint.Entry',]</span></tt>.</p>
+<p><strong>Default:</strong> <tt class="docutils literal"><span class="pre">[]</span></tt></p>
+</div>
+<div class="section" id="blog-relation-models">
+<h2>BLOG_RELATION_MODELS<a class="headerlink" href="#blog-relation-models" title="Permalink to this headline">¶</a></h2>
+<p>A list of strings in <tt class="docutils literal"><span class="pre">'app.Model'</span></tt> format. Authors can relate any instance of these models to any blog. For example: to show related blogs you would set it to <tt class="docutils literal"><span class="pre">['viewpoint.Blog',]</span></tt>.</p>
+<p><strong>Default:</strong> <tt class="docutils literal"><span class="pre">[]</span></tt></p>
+</div>
+<div class="section" id="use-approval">
+<h2>USE_APPROVAL<a class="headerlink" href="#use-approval" title="Permalink to this headline">¶</a></h2>
+<p>Require moderators to approve entries before publication.</p>
+<p><strong>Default:</strong> <tt class="xref docutils literal"><span class="pre">False</span></tt></p>
+</div>
+<div class="section" id="default-storage">
+<h2>DEFAULT_STORAGE<a class="headerlink" href="#default-storage" title="Permalink to this headline">¶</a></h2>
+<p>The default file storage for photos for entries and blogs.</p>
+<p><strong>Default:</strong> <tt class="docutils literal"><span class="pre">settings.DEFAULT_FILE_STORAGE</span></tt></p>
+</div>
+<div class="section" id="use-categories">
+<h2>USE_CATEGORIES<a class="headerlink" href="#use-categories" title="Permalink to this headline">¶</a></h2>
+<p>Include support for django-categories.</p>
+<p><strong>Default:</strong> <tt class="xref docutils literal"><span class="pre">False</span></tt></p>
+</div>
+<div class="section" id="author-model">
+<h2>AUTHOR_MODEL<a class="headerlink" href="#author-model" title="Permalink to this headline">¶</a></h2>
+<p>A string in the format <tt class="docutils literal"><span class="pre">'app.Model'</span></tt> to use as the basis for the authors of blog entries.</p>
+<p><strong>Default:</strong> <tt class="docutils literal"><span class="pre">'auth.user'</span></tt></p>
+</div>
+<div class="section" id="use-tagging">
+<h2>USE_TAGGING<a class="headerlink" href="#use-tagging" title="Permalink to this headline">¶</a></h2>
+<p>Include support for django-tagging.</p>
+<p><strong>Default:</strong> <tt class="xref docutils literal"><span class="pre">False</span></tt></p>
+</div>
+<div class="section" id="default-blog">
+<span id="id1"></span><h2>DEFAULT_BLOG<a class="headerlink" href="#default-blog" title="Permalink to this headline">¶</a></h2>
+<p>If you aren&#8217;t going to use multiple blogs, this is the name of the one blog you are going to use. URLs are refactored to hide the name of the blog.</p>
+<p><strong>Default:</strong> <tt class="docutils literal"><span class="pre">''</span></tt></p>
+</div>
+<div class="section" id="month-format">
+<span id="id2"></span><h2>MONTH_FORMAT<a class="headerlink" href="#month-format" title="Permalink to this headline">¶</a></h2>
+<p>For your URLs, you can customize the format of the month in the default URL regular expressions.</p>
+<table border="1" class="docutils">
+<caption>Month formatting codes</caption>
+<colgroup>
+<col width="13%" />
+<col width="69%" />
+<col width="19%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">Code</th>
+<th class="head">Description</th>
+<th class="head">Example</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td><tt class="docutils literal"><span class="pre">%b</span></tt></td>
+<td>Locale’s abbreviated month name</td>
+<td>Dec</td>
+</tr>
+<tr><td><tt class="docutils literal"><span class="pre">%B</span></tt></td>
+<td>Locale&#8217;s full month name</td>
+<td>December</td>
+</tr>
+<tr><td><tt class="docutils literal"><span class="pre">%m</span></tt></td>
+<td>Month as a decimal number [01,12]</td>
+<td>12</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Default:</strong> <tt class="docutils literal"><span class="pre">r'%b'</span></tt></p>
+</div>
+<div class="section" id="url-regexes">
+<h2>URL_REGEXES<a class="headerlink" href="#url-regexes" title="Permalink to this headline">¶</a></h2>
+<p>A dictionary of regular expressions to use for matching URLs. The dictionary should have <tt class="docutils literal"><span class="pre">'blog'</span></tt>, <tt class="docutils literal"><span class="pre">'year'</span></tt>, <tt class="docutils literal"><span class="pre">'month'</span></tt>, <tt class="docutils literal"><span class="pre">'day'</span></tt>, <tt class="docutils literal"><span class="pre">'entry'</span></tt>keys. The default URL_REGEXES use the <a class="reference internal" href="#month-format"><em>MONTH_FORMAT</em></a>.</p>
+<p><strong>Default:</strong>
+If the <a class="reference internal" href="#default-blog"><em>DEFAULT_BLOG</em></a> is set:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">VIEWPOINT_SETTINGS</span><span class="p">[</span><span class="s">&#39;URL_REGEXES&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s">&#39;blog&#39;</span><span class="p">:</span> <span class="s">r&#39;^$&#39;</span><span class="p">,</span>
+    <span class="s">&#39;year&#39;</span><span class="p">:</span> <span class="s">r&#39;^(?P&lt;year&gt;\d{4})/$&#39;</span><span class="p">,</span>
+    <span class="s">&#39;month&#39;</span><span class="p">:</span> <span class="s">r&#39;^(?P&lt;year&gt;\d{4})/(?P&lt;month&gt;%b)/$&#39;</span><span class="p">,</span>
+    <span class="s">&#39;day&#39;</span><span class="p">:</span> <span class="s">r&#39;^(?P&lt;year&gt;\d{4})/(?P&lt;month&gt;%b)/(?P&lt;day&gt;\d{1,2})/$&#39;</span><span class="p">,</span>
+    <span class="s">&#39;entry&#39;</span><span class="p">:</span> <span class="s">r&#39;^(?P&lt;year&gt;\d{4})/(?P&lt;month&gt;%b)/(?P&lt;day&gt;\d{1,2})/(?P&lt;slug&gt;[-\w]+)/$&#39;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>If the <a class="reference internal" href="#default-blog"><em>DEFAULT_BLOG</em></a> is not set:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">VIEWPOINT_SETTINGS</span><span class="p">[</span><span class="s">&#39;URL_REGEXES&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s">&#39;blog&#39;</span><span class="p">:</span> <span class="s">r&#39;^(?P&lt;blog_slug&gt;[-\w]+)/$&#39;</span><span class="p">,</span>
+    <span class="s">&#39;year&#39;</span><span class="p">:</span> <span class="s">r&#39;^(?P&lt;blog_slug&gt;[-\w]+)/(?P&lt;year&gt;\d{4})/$&#39;</span><span class="p">,</span>
+    <span class="s">&#39;month&#39;</span><span class="p">:</span> <span class="s">r&#39;^(?P&lt;blog_slug&gt;[-\w]+)/(?P&lt;year&gt;\d{4})/(?P&lt;month&gt;%b)/$&#39;</span><span class="p">,</span>
+    <span class="s">&#39;day&#39;</span><span class="p">:</span> <span class="s">r&#39;^(?P&lt;blog_slug&gt;[-\w]+)/(?P&lt;year&gt;\d{4})/(?P&lt;month&gt;%b)/(?P&lt;day&gt;\d{1,2})/$&#39;</span><span class="p">,</span>
+    <span class="s">&#39;entry&#39;</span><span class="p">:</span> <span class="s">r&#39;^(?P&lt;blog_slug&gt;[-\w]+)/(?P&lt;year&gt;\d{4})/(?P&lt;month&gt;%b)/(?P&lt;day&gt;\d{1,2})/(?P&lt;slug&gt;[-\w]+)/$&#39;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div> 
+        </div>
+      </div>
+    <div class="footer">
+    <p>
+      &copy; Copyright 2010, The Washington Times.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+	</p>
+    </div>
+      <div class="clearer"></div>
+    </div>
+	<div id="breadcrumbs">
+		<a href="index.html" accesskey="U">Reference</a><img src="../_static/triangle_closed.png" height="9" width="9" alt="&gt;">
+		Settings
+		</ul>
+	</div>
+	<script type="text/javascript" charset="utf-8" src="../_static/toc.js"></script>
+  </body>
+</html>
