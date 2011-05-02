@@ -31,11 +31,6 @@ if USE_CATEGORIES and 'categories' in settings.INSTALLED_APPS:
 else:
     HAS_CATEGORIES = False
 
-AuthorModel = get_model(*AUTHOR_MODEL.split('.'))
-if not AuthorModel:
-    raise ImproperlyConfigured("The VIEWPOINT_AUTHOR_MODEL (%s) " + \
-                                "isn't installed" % AUTHOR_MODEL)
-
 AUTHOR_LIMIT_CHOICES = {}
 
 if STAFF_ONLY and not 'staff' in settings.INSTALLED_APPS:
@@ -67,7 +62,7 @@ class Blog(models.Model):
         storage=IMAGE_STORAGE(),
         upload_to='viewpoint/blog/%Y/%m/%d/')
     owners = models.ManyToManyField(
-        AuthorModel, 
+        AUTHOR_MODEL, 
         blank=True, 
         limit_choices_to=AUTHOR_LIMIT_CHOICES)
     public = models.BooleanField(default=True)
@@ -106,9 +101,7 @@ class Blog(models.Model):
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = slugify(self.title)[:50]
-        for entry in self.entry_set.all():
-            entry.public = self.public
-            entry.save()
+        self.entry_set.all().update(public=self.public)
         super(Blog, self).save(*args, **kwargs)
 
     @models.permalink
@@ -148,7 +141,7 @@ class Entry(models.Model):
     blog = models.ForeignKey(Blog)
     title = models.CharField(max_length=255)
     slug = models.SlugField(unique_for_date='pub_date')
-    author = models.ForeignKey(AuthorModel)
+    author = models.ForeignKey(AUTHOR_MODEL)
     credit = models.CharField(
         max_length=255, 
         blank=True, 

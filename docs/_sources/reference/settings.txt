@@ -14,6 +14,15 @@ The default settings are:
 
 .. code-block:: python
 
+	import settings
+	
+	for i in range(15):
+	    print i
+	import settings
+	
+	for i in range(15):
+	    print i
+	
 	VIEWPOINT_SETTINGS = {
 	    'STAFF_ONLY': True,
 	    'ENTRY_RELATION_MODELS': [],

@@ -86,8 +86,8 @@ INSTALLED_APPS = (
     'django.contrib.comments',
     'django.contrib.flatpages',
 )
-
-BLOG_RELATION_MODELS = ('flatpages.flatpage',)
-VIEWPOINT_DEFAULT_BLOG = 'default'
-VIEWPOINT_MONTH_FORMAT = "%b"
-#VIEWPOINT_DEFAULT_STORAGE = 'media_storage.MediaStorage'
+VIEWPOINT_SETTINGS = {
+    'BLOG_RELATION_MODELS': ('flatpages.flatpage',),
+    'DEFAULT_BLOG': 'default',
+    #'DEFAULT_STORAGE' = 'media_storage.MediaStorage'
+}
