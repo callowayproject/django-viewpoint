@@ -106,9 +106,7 @@ class Blog(models.Model):
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = slugify(self.title)[:50]
-        for entry in self.entry_set.all():
-            entry.public = self.public
-            entry.save()
+        self.entry_set.all().update(public=self.public)
         super(Blog, self).save(*args, **kwargs)
 
     @models.permalink
