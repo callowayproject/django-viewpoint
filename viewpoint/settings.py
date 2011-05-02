@@ -20,8 +20,8 @@ VIEWPOINT_SETTINGS.update(getattr(settings, 'VIEWPOINT_SETTINGS', {}))
 
 if hasattr(settings, 'VIEWPOINT_STAFF_ONLY'):
     warnings.warn(
-        "settings.VIEWPOINT_STAFF_ONLY is deprecated; use settings.VIEWPOINT instead.",
-        PendingDeprecationWarning
+        "settings.VIEWPOINT_STAFF_ONLY is deprecated; use settings.VIEWPOINT_SETTINGS instead.",
+        DeprecationWarning
     )
     STAFF_ONLY = getattr(settings, 'VIEWPOINT_STAFF_ONLY')
 else:
@@ -29,8 +29,8 @@ else:
 
 if hasattr(settings, 'ENTRY_RELATION_MODELS'):
     warnings.warn(
-        "settings.ENTRY_RELATION_MODELS is deprecated; use settings.VIEWPOINT instead.",
-        PendingDeprecationWarning
+        "settings.ENTRY_RELATION_MODELS is deprecated; use settings.VIEWPOINT_SETTINGS instead.",
+        DeprecationWarning
     )
     ENTRY_RELATION_MODELS = getattr(settings, 'ENTRY_RELATION_MODELS', [])
 else:
@@ -38,8 +38,8 @@ else:
 
 if hasattr(settings, 'BLOG_RELATION_MODELS'):
     warnings.warn(
-        "settings.BLOG_RELATION_MODELS is deprecated; use settings.VIEWPOINT instead.",
-        PendingDeprecationWarning
+        "settings.BLOG_RELATION_MODELS is deprecated; use settings.VIEWPOINT_SETTINGS instead.",
+        DeprecationWarning
     )
     BLOG_RELATION_MODELS = getattr(settings, 'BLOG_RELATION_MODELS')
 else:
@@ -47,8 +47,8 @@ else:
 
 if hasattr(settings, 'VIEWPOINT_USE_APPROVAL'):
     warnings.warn(
-        "settings.VIEWPOINT_USE_APPROVAL is deprecated; use settings.VIEWPOINT instead.",
-        PendingDeprecationWarning
+        "settings.VIEWPOINT_USE_APPROVAL is deprecated; use settings.VIEWPOINT_SETTINGS instead.",
+        DeprecationWarning
     )
     USE_APPROVAL = getattr(settings, 'VIEWPOINT_USE_APPROVAL')
 else:
@@ -56,8 +56,8 @@ else:
 
 if hasattr(settings, 'VIEWPOINT_DEFAULT_STORAGE'):
     warnings.warn(
-        "settings.VIEWPOINT_DEFAULT_STORAGE is deprecated; use settings.VIEWPOINT instead.",
-        PendingDeprecationWarning
+        "settings.VIEWPOINT_DEFAULT_STORAGE is deprecated; use settings.VIEWPOINT_SETTINGS instead.",
+        DeprecationWarning
     )
     DEFAULT_STORAGE = getattr(settings, 'VIEWPOINT_DEFAULT_STORAGE')
 else:
@@ -65,8 +65,8 @@ else:
 
 if hasattr(settings, 'VIEWPOINT_USE_CATEGORIES'):
     warnings.warn(
-        "settings.VIEWPOINT_USE_CATEGORIES is deprecated; use settings.VIEWPOINT instead.",
-        PendingDeprecationWarning
+        "settings.VIEWPOINT_USE_CATEGORIES is deprecated; use settings.VIEWPOINT_SETTINGS instead.",
+        DeprecationWarning
     )
     USE_CATEGORIES = getattr(settings, 'VIEWPOINT_USE_CATEGORIES')
 else:
@@ -74,8 +74,8 @@ else:
 
 if hasattr(settings, 'VIEWPOINT_AUTHOR_MODEL'):
     warnings.warn(
-        "settings.VIEWPOINT_AUTHOR_MODEL is deprecated; use settings.VIEWPOINT instead.",
-        PendingDeprecationWarning
+        "settings.VIEWPOINT_AUTHOR_MODEL is deprecated; use settings.VIEWPOINT_SETTINGS instead.",
+        DeprecationWarning
     )
     AUTHOR_MODEL = getattr(settings, 'VIEWPOINT_AUTHOR_MODEL')
 else:
@@ -83,8 +83,8 @@ else:
 
 if hasattr(settings, 'VIEWPOINT_USE_TAGGING'):
     warnings.warn(
-        "settings.VIEWPOINT_USE_TAGGING is deprecated; use settings.VIEWPOINT instead.",
-        PendingDeprecationWarning
+        "settings.VIEWPOINT_USE_TAGGING is deprecated; use settings.VIEWPOINT_SETTINGS instead.",
+        DeprecationWarning
     )
     USE_TAGGING = getattr(settings, 'VIEWPOINT_USE_TAGGING')
 else:
@@ -92,8 +92,8 @@ else:
 
 if hasattr(settings, 'VIEWPOINT_DEFAULT_BLOG'):
     warnings.warn(
-        "settings.VIEWPOINT_DEFAULT_BLOG is deprecated; use settings.VIEWPOINT instead.",
-        PendingDeprecationWarning
+        "settings.VIEWPOINT_DEFAULT_BLOG is deprecated; use settings.VIEWPOINT_SETTINGS instead.",
+        DeprecationWarning
     )
     DEFAULT_BLOG = getattr(settings, 'VIEWPOINT_DEFAULT_BLOG')
 else:
@@ -101,8 +101,8 @@ else:
 
 if hasattr(settings, 'VIEWPOINT_MONTH_FORMAT'):
     warnings.warn(
-        "settings.VIEWPOINT_MONTH_FORMAT is deprecated; use settings.VIEWPOINT instead.",
-        PendingDeprecationWarning
+        "settings.VIEWPOINT_MONTH_FORMAT is deprecated; use settings.VIEWPOINT_SETTINGS instead.",
+        DeprecationWarning
     )
     MONTH_FORMAT = getattr(settings, 'VIEWPOINT_MONTH_FORMAT', r"%b")
 else:
@@ -144,8 +144,8 @@ for item in ('blog', 'year', 'month', 'day', 'entry'):
 
 if hasattr(settings, 'VIEWPOINT_URL_REGEXES'):
     warnings.warn(
-        "settings.VIEWPOINT_URL_REGEXES is deprecated; use settings.VIEWPOINT instead.",
-        PendingDeprecationWarning
+        "settings.VIEWPOINT_URL_REGEXES is deprecated; use settings.VIEWPOINT_SETTINGS instead.",
+        DeprecationWarning
     )
     URL_REGEXES = getattr(settings, 'VIEWPOINT_URL_REGEXES')
 else:
