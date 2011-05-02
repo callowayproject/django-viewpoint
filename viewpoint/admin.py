@@ -1,9 +1,12 @@
-from models import Blog, Entry, HAS_CATEGORIES, AuthorModel
-from forms import BlogForm, EntryForm
 from django.contrib import admin
 from django.conf import settings
+from django.db.models import get_model
 
-from viewpoint.settings import USE_APPROVAL
+from viewpoint.settings import USE_APPROVAL, AUTHOR_MODEL
+from models import Blog, Entry, HAS_CATEGORIES
+from forms import BlogForm, EntryForm
+
+AuthorModel = get_model(*AUTHOR_MODEL.split('.'))
 
 if hasattr(settings, 'BLOG_RELATION_MODELS'):
     from genericcollections import *
