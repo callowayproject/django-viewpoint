@@ -210,7 +210,13 @@ class Entry(models.Model):
                 'slug': self.slug
             }
         return ('viewpoint_entry_detail', None, kwargs)
-    #
+    
+    @property
+    def paragraphs():
+        text = "<html><head></head><body>" + self.body + "</body></html>"
+        soup = BeautifulSoup(text)
+        return [i for i in soup.body.childGenerator() if isinstance(i, Tag)]
+    
     if ENTRY_RELATION_MODELS:
         def get_related_content_type(self, content_type):
             return self.entryrelation_set.filter(content_type__name=content_type)

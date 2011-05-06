@@ -3,3 +3,4 @@
 #django-categories
 #django-tinymce
 django-xmlrpc
+BeautifulSoup
