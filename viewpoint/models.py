@@ -212,7 +212,8 @@ class Entry(models.Model):
         return ('viewpoint_entry_detail', None, kwargs)
     
     @property
-    def paragraphs():
+    def paragraphs(self):
+        from BeautifulSoup import BeautifulSoup, Tag
         text = "<html><head></head><body>" + self.body + "</body></html>"
         soup = BeautifulSoup(text)
         return [i for i in soup.body.childGenerator() if isinstance(i, Tag)]
