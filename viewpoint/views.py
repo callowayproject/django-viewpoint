@@ -39,7 +39,7 @@ def generic_blog_entry_view(request, *args,  **kwargs):
         if 'template_name' not in params.keys():
             params['template_name'] = get_template(blog_slug, 'entry_detail')
             params['month_format'] = MONTH_FORMAT
-            params.pop('allow_empty')
+        params.pop('allow_empty')
         return object_detail(request, **params)
     elif 'day' in kwargs.keys():
         if 'template_name' not in params.keys():
