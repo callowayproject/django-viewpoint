@@ -56,11 +56,13 @@ class Blog(models.Model):
     title = models.CharField(max_length=255)
     slug = models.SlugField(unique=True)
     tease = models.TextField(blank=True)
-    photo = models.ImageField(
+    photo = models.FileField(
         null=True,
         blank=True,
         storage=IMAGE_STORAGE(),
         upload_to='viewpoint/blog/%Y/%m/%d/')
+    photo_width = models.IntegerField(blank=True, null=True)
+    photo_height = models.IntegerField(blank=True, null=True)
     owners = models.ManyToManyField(
         AUTHOR_MODEL, 
         blank=True, 
@@ -97,13 +99,22 @@ class Blog(models.Model):
     
     def __unicode__(self):
         return self.title
-
+    
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = slugify(self.title)[:50]
         self.entry_set.all().update(public=self.public)
+        if self.photo:
+            from django.core.files.images import get_image_dimensions
+            width, height = get_image_dimensions(self.photo.file, close=True)
+        else:
+            width, height = None, None
+        
+        self.photo_width = width
+        self.photo_height = height
+        
         super(Blog, self).save(*args, **kwargs)
-
+    
     @models.permalink
     def get_absolute_url(self):
         """
@@ -113,7 +124,7 @@ class Blog(models.Model):
             return ('viewpoint_blog_detail', None, None)
         else:
             return ('viewpoint_blog_detail', None, {'blog_slug': self.slug})
-        
+    
     class Meta:
         ordering = ('title',)
         get_latest_by = 'creation_date'
@@ -146,11 +157,13 @@ class Entry(models.Model):
         max_length=255, 
         blank=True, 
         null=True)
-    photo = models.ImageField(
+    photo = models.FileField(
         null=True,
         blank=True,
         storage=IMAGE_STORAGE(),
         upload_to='viewpoint/entry/%Y/%m/%d/')
+    photo_width = models.IntegerField(blank=True, null=True)
+    photo_height = models.IntegerField(blank=True, null=True)
     tease = models.TextField()
     body = models.TextField()
     public = models.BooleanField(default=True)
@@ -185,6 +198,17 @@ class Entry(models.Model):
                 self.category = self.blog.category
             except ObjectDoesNotExist:
                 pass
+        
+        if self.photo:
+            from django.core.files.images import get_image_dimensions
+            width, height = get_image_dimensions(self.photo.file, close=True)
+        else:
+            width, height = None, None
+        
+        self.photo_width = width
+        self.photo_height = height
+        
+        
         self.update_date = datetime.datetime.now()
         super(Entry, self).save(*a, **kw)
 

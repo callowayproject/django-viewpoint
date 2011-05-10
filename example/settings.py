@@ -85,6 +85,7 @@ INSTALLED_APPS = (
     'viewpoint',
     'django.contrib.comments',
     'django.contrib.flatpages',
+    #'south',
 )
 VIEWPOINT_SETTINGS = {
     'BLOG_RELATION_MODELS': ('flatpages.flatpage',),
