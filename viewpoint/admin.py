@@ -2,13 +2,14 @@ from django.contrib import admin
 from django.conf import settings
 from django.db.models import get_model
 
-from viewpoint.settings import USE_APPROVAL, AUTHOR_MODEL
+from viewpoint.settings import (USE_APPROVAL, AUTHOR_MODEL, 
+                                BLOG_RELATION_MODELS, ENTRY_RELATION_MODELS)
 from models import Blog, Entry, HAS_CATEGORIES
 from forms import BlogForm, EntryForm
 
 AuthorModel = get_model(*AUTHOR_MODEL.split('.'))
 
-if hasattr(settings, 'BLOG_RELATION_MODELS'):
+if BLOG_RELATION_MODELS:
     from genericcollections import *
     from models import BlogRelation
     
@@ -45,7 +46,7 @@ class BlogAdmin(admin.ModelAdmin):
     if HAS_CATEGORIES:
         fieldsets[-1][1]['fields'] += ('category',)
     
-    if hasattr(settings, 'BLOG_RELATION_MODELS'):
+    if BLOG_RELATION_MODELS:
         inlines = (InlineBlogRelation,)
         
         class Media:
@@ -94,7 +95,7 @@ class BlogAdmin(admin.ModelAdmin):
         return []
 
 
-if hasattr(settings, 'ENTRY_RELATION_MODELS'):
+if ENTRY_RELATION_MODELS:
     from genericcollections import *
     from models import EntryRelation
     
@@ -122,7 +123,7 @@ class EntryAdmin(admin.ModelAdmin):
     else:
         list_editable = ('public',)
     
-    if hasattr(settings, 'ENTRY_RELATION_MODELS'):
+    if ENTRY_RELATION_MODELS:
         inlines = (InlineEntryRelation,)
         
         class Media:
