@@ -1,5 +1,4 @@
 from django.contrib import admin
-from django.conf import settings
 from django.db.models import get_model
 
 from viewpoint.settings import (USE_APPROVAL, AUTHOR_MODEL, 
@@ -9,8 +8,10 @@ from forms import BlogForm, EntryForm
 
 AuthorModel = get_model(*AUTHOR_MODEL.split('.'))
 
+if BLOG_RELATION_MODELS or ENTRY_RELATION_MODELS:
+    from genericcollections import GenericCollectionTabularInline
+
 if BLOG_RELATION_MODELS:
-    from genericcollections import *
     from models import BlogRelation
     
     class InlineBlogRelation(GenericCollectionTabularInline):
@@ -96,7 +97,6 @@ class BlogAdmin(admin.ModelAdmin):
 
 
 if ENTRY_RELATION_MODELS:
-    from genericcollections import *
     from models import EntryRelation
     
     class InlineEntryRelation(GenericCollectionTabularInline):
