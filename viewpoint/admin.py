@@ -1,5 +1,6 @@
 from django.contrib import admin
 from django.db.models import get_model
+from django.utils.formats import date_format, time_format
 
 from viewpoint.settings import (USE_APPROVAL, AUTHOR_MODEL, 
                                 BLOG_RELATION_MODELS, ENTRY_RELATION_MODELS)
@@ -132,7 +133,8 @@ class EntryAdmin(admin.ModelAdmin):
         """
         Return a formatted pub_date
         """
-        return obj.pub_date.strftime("%Y-%m-%d %I:%M %p")
+        return "%s %s" % (date_format(obj.update_date), time_format(obj.update_date))
+    last_updated.admin_order_field = 'update_date'
     
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if not request.user.is_superuser:
