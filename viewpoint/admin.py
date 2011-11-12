@@ -108,20 +108,19 @@ class EntryAdmin(admin.ModelAdmin):
     prepopulated_fields = {"slug": ("title",)}
     exclude = ['approved']
     date_hierarchy = 'pub_date'
-    list_display = ('title', 'pub_date','blog', 'public', 'approved')
     related_search_fields = {
         'author': ('^user__username', '^first_name', '^last_name'),
     }
     actions = ['make_approved', 'make_not_approved', 'make_public', 'make_not_public']
-    search_fields = ('blog__title','title','tease','body')
+    search_fields = ('blog__title', 'title', 'tease', 'body')
     if USE_APPROVAL:
-        list_filter = ('blog','public','approved')
-    else:
-        list_filter = ('blog','public',)
-    if USE_APPROVAL:
+        list_filter = ('blog', 'public', 'approved')
         list_editable = ('public', 'approved')
+        list_display = ('title', 'pub_date', 'update_date', 'blog', 'public', 'approved')
     else:
+        list_filter = ('blog', 'public',)
         list_editable = ('public',)
+        list_display = ('title', 'pub_date', 'update_date', 'blog', 'public', )
     
     if ENTRY_RELATION_MODELS:
         inlines = (InlineEntryRelation,)
