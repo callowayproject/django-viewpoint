@@ -1,10 +1,9 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 from django.contrib.syndication.feeds import Feed
 from django.contrib.syndication.views import Feed as FeedView
 from django.contrib.contenttypes.models import ContentType
 from django.conf import settings
 from django.contrib.sites.models import Site
-from django.core.urlresolvers import reverse, resolve
 from django.utils.feedgenerator import Rss201rev2Feed, Atom1Feed
 from viewpoint.settings import USE_CATEGORIES, DEFAULT_BLOG
 

@@ -28,8 +28,14 @@ else:
 if USE_CATEGORIES and 'categories' in settings.INSTALLED_APPS:
     from categories.models import Category
     HAS_CATEGORIES = True
+    category_field = models.ForeignKey(
+        Category,
+        related_name='viewpoint_categories',
+        blank=True,
+        null=True)
 else:
     HAS_CATEGORIES = False
+    category_field = models.IntegerField(blank=True, null=True)
 
 AUTHOR_LIMIT_CHOICES = {}
 
@@ -37,6 +43,8 @@ if STAFF_ONLY and not 'staff' in settings.INSTALLED_APPS:
     AUTHOR_LIMIT_CHOICES = {'is_staff': True}
 
 IMAGE_STORAGE = get_storage_class(DEFAULT_STORAGE)
+
+AUTHOR_MODEL = get_model(*AUTHOR_MODEL.split('.'))
 
 class BlogManager(models.Manager):
     """
@@ -70,12 +78,7 @@ class Blog(models.Model):
     public = models.BooleanField(default=True)
     active = models.BooleanField(default=True)
     creation_date = models.DateTimeField(auto_now_add=True)
-    if HAS_CATEGORIES:
-        category = models.ForeignKey(
-            Category,
-            related_name='viewpoint_categories',
-            blank=True,
-            null=True)
+    category = category_field
     alternate_title = models.CharField(
         blank=True,
         default="",
@@ -252,46 +255,43 @@ class Entry(models.Model):
 if HAS_TAGGING:
     tagging.register(Blog)
 
-if ENTRY_RELATION_MODELS:
-    RELATIONS = [Q(app_label=al, model=m) for al, m in [x.split('.') for x in ENTRY_RELATION_MODELS]]
-    
-    ENTRY_RELATION_LIMITS = reduce(lambda x, y: x|y, RELATIONS)
-    class EntryRelation(models.Model):
-        """Related entry item"""
-        entry = models.ForeignKey(Entry)
-        content_type = models.ForeignKey(
-            ContentType, 
-            limit_choices_to=ENTRY_RELATION_LIMITS)
-        object_id = models.PositiveIntegerField()
-        content_object = generic.GenericForeignKey('content_type', 'object_id')
-        relation_type = models.CharField(_("Relation Type"), 
-            max_length="200", 
-            blank=True, 
-            null=True,
-            help_text=_("A generic text field to tag a relation, like 'leadphoto'."))
-            
-        def __unicode__(self):
-            return u"EntryRelation"
+RELATIONS = [Q(app_label=al, model=m) for al, m in [x.split('.') for x in ENTRY_RELATION_MODELS]]
 
-if BLOG_RELATION_MODELS:
-    RELATIONS = [Q(app_label=al, model=m) for al, m in [x.split('.') for x in BLOG_RELATION_MODELS]]
-    
-    BLOG_RELATION_LIMITS = reduce(lambda x, y: x|y, RELATIONS)
-    class BlogRelation(models.Model):
-        """Related blog item"""
-        blog = models.ForeignKey(Blog)
-        content_type = models.ForeignKey(
-            ContentType, 
-            limit_choices_to=BLOG_RELATION_LIMITS)
-        object_id = models.PositiveIntegerField()
-        content_object = generic.GenericForeignKey('content_type', 'object_id')
-        relation_type = models.CharField(_("Relation Type"), 
-            max_length="200", 
-            blank=True, 
-            null=True,
-            help_text=_("A generic text field to tag a relation, like 'leadphoto'."))
-            
-        def __unicode__(self):
-            return u"BlogRelation"
+ENTRY_RELATION_LIMITS = RELATIONS and reduce(lambda x, y: x|y, RELATIONS)
+class EntryRelation(models.Model):
+    """Related entry item"""
+    entry = models.ForeignKey(Entry)
+    content_type = models.ForeignKey(
+        ContentType, 
+        limit_choices_to=ENTRY_RELATION_LIMITS)
+    object_id = models.PositiveIntegerField()
+    content_object = generic.GenericForeignKey('content_type', 'object_id')
+    relation_type = models.CharField(_("Relation Type"), 
+        max_length="200", 
+        blank=True, 
+        null=True,
+        help_text=_("A generic text field to tag a relation, like 'leadphoto'."))
+        
+    def __unicode__(self):
+        return u"EntryRelation"
 
-    
+RELATIONS = [Q(app_label=al, model=m) for al, m in [x.split('.') for x in BLOG_RELATION_MODELS]]
+
+BLOG_RELATION_LIMITS = RELATIONS and reduce(lambda x, y: x|y, RELATIONS)
+class BlogRelation(models.Model):
+    """Related blog item"""
+    blog = models.ForeignKey(Blog)
+    content_type = models.ForeignKey(
+        ContentType, 
+        limit_choices_to=BLOG_RELATION_LIMITS)
+    object_id = models.PositiveIntegerField()
+    content_object = generic.GenericForeignKey('content_type', 'object_id')
+    relation_type = models.CharField(_("Relation Type"), 
+        max_length="200", 
+        blank=True, 
+        null=True,
+        help_text=_("A generic text field to tag a relation, like 'leadphoto'."))
+        
+    def __unicode__(self):
+        return u"BlogRelation"
+

@@ -1,5 +1,4 @@
 from django.contrib import admin
-from django.conf import settings
 from django.db.models import get_model
 
 from viewpoint.settings import (USE_APPROVAL, AUTHOR_MODEL, 
@@ -9,8 +8,10 @@ from forms import BlogForm, EntryForm
 
 AuthorModel = get_model(*AUTHOR_MODEL.split('.'))
 
+if BLOG_RELATION_MODELS or ENTRY_RELATION_MODELS:
+    from genericcollections import GenericCollectionTabularInline
+
 if BLOG_RELATION_MODELS:
-    from genericcollections import *
     from models import BlogRelation
     
     class InlineBlogRelation(GenericCollectionTabularInline):
@@ -96,7 +97,6 @@ class BlogAdmin(admin.ModelAdmin):
 
 
 if ENTRY_RELATION_MODELS:
-    from genericcollections import *
     from models import EntryRelation
     
     class InlineEntryRelation(GenericCollectionTabularInline):
@@ -108,27 +108,31 @@ class EntryAdmin(admin.ModelAdmin):
     prepopulated_fields = {"slug": ("title",)}
     exclude = ['approved']
     date_hierarchy = 'pub_date'
-    list_display = ('title', 'pub_date','blog', 'public', 'approved')
     related_search_fields = {
         'author': ('^user__username', '^first_name', '^last_name'),
     }
     actions = ['make_approved', 'make_not_approved', 'make_public', 'make_not_public']
-    search_fields = ('blog__title','title','tease','body')
+    search_fields = ('blog__title', 'title', 'tease', 'body')
     if USE_APPROVAL:
-        list_filter = ('blog','public','approved')
-    else:
-        list_filter = ('blog','public',)
-    if USE_APPROVAL:
+        list_filter = ('blog', 'public', 'approved')
         list_editable = ('public', 'approved')
+        list_display = ('title', 'pub_date', 'last_updated', 'blog', 'public', 'approved')
     else:
+        list_filter = ('blog', 'public',)
         list_editable = ('public',)
+        list_display = ('title', 'pub_date', 'last_updated', 'blog', 'public', )
     
     if ENTRY_RELATION_MODELS:
         inlines = (InlineEntryRelation,)
         
         class Media:
             js = ("js/genericcollections.js",)
-        
+    
+    def last_updated(self, obj):
+        """
+        Return a formatted pub_date
+        """
+        return obj.pub_date.strftime("%Y-%m-%d %I:%M %p")
     
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if not request.user.is_superuser:
