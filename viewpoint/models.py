@@ -44,6 +44,8 @@ if STAFF_ONLY and not 'staff' in settings.INSTALLED_APPS:
 
 IMAGE_STORAGE = get_storage_class(DEFAULT_STORAGE)
 
+AUTHOR_MODEL = get_model(*AUTHOR_MODEL.split('.'))
+
 class BlogManager(models.Manager):
     """
     Manager for Blogs that allow you to select just the blogs that are public.
