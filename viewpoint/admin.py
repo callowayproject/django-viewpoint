@@ -116,18 +116,23 @@ class EntryAdmin(admin.ModelAdmin):
     if USE_APPROVAL:
         list_filter = ('blog', 'public', 'approved')
         list_editable = ('public', 'approved')
-        list_display = ('title', 'pub_date', 'update_date', 'blog', 'public', 'approved')
+        list_display = ('title', 'pub_date', 'last_updated', 'blog', 'public', 'approved')
     else:
         list_filter = ('blog', 'public',)
         list_editable = ('public',)
-        list_display = ('title', 'pub_date', 'update_date', 'blog', 'public', )
+        list_display = ('title', 'pub_date', 'last_updated', 'blog', 'public', )
     
     if ENTRY_RELATION_MODELS:
         inlines = (InlineEntryRelation,)
         
         class Media:
             js = ("js/genericcollections.js",)
-        
+    
+    def last_updated(self, obj):
+        """
+        Return a formatted pub_date
+        """
+        return obj.pub_date.strftime("%Y-%m-%d %I:%M %p")
     
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if not request.user.is_superuser:
