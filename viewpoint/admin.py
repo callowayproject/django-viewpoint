@@ -103,25 +103,33 @@ if ENTRY_RELATION_MODELS:
     class InlineEntryRelation(GenericCollectionTabularInline):
         model = EntryRelation
 
+if USE_APPROVAL:
+    PUBLIC_FIELDS = ('public', 'approved', )
+else:
+    PUBLIC_FIELDS = ('public',)
 
 class EntryAdmin(admin.ModelAdmin):
     form = EntryForm
     prepopulated_fields = {"slug": ("title",)}
-    exclude = ['approved']
     date_hierarchy = 'pub_date'
     related_search_fields = {
         'author': ('^user__username', '^first_name', '^last_name'),
     }
     actions = ['make_approved', 'make_not_approved', 'make_public', 'make_not_public']
     search_fields = ('blog__title', 'title', 'tease', 'body')
-    if USE_APPROVAL:
-        list_filter = ('blog', 'public', 'approved')
-        list_editable = ('public', 'approved')
-        list_display = ('title', 'pub_date', 'last_updated', 'blog', 'public', 'approved')
-    else:
-        list_filter = ('blog', 'public',)
-        list_editable = ('public',)
-        list_display = ('title', 'pub_date', 'last_updated', 'blog', 'public', )
+    fieldsets = (
+        (None, {'fields': (PUBLIC_FIELDS, )}),
+        ('Content', {'fields': ('blog', 'title', 'author', 'tease', 'body', )}),
+        ('Media', {'fields': ('photo', 'credit', )}),
+        ('Advanced Options', {
+            'classes': ('collapse',),
+            'fields': ('slug', ),
+        }),
+    
+    )
+    list_filter = ('blog',) + PUBLIC_FIELDS
+    list_editable = PUBLIC_FIELDS
+    list_display = ('title', 'pub_date', 'last_updated', 'blog', ) + PUBLIC_FIELDS
     
     if ENTRY_RELATION_MODELS:
         inlines = (InlineEntryRelation,)
