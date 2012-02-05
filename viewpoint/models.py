@@ -6,15 +6,14 @@ from django.template.defaultfilters import slugify
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist, ImproperlyConfigured
 from django.core.files.storage import get_storage_class
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.contenttypes import generic
 
 from viewpoint.settings import (STAFF_ONLY, ENTRY_RELATION_MODELS, USE_APPROVAL,
                                 BLOG_RELATION_MODELS, DEFAULT_STORAGE,
                                 USE_CATEGORIES, USE_TAGGING, AUTHOR_MODEL, 
                                 DEFAULT_BLOG, MONTH_FORMAT)
 
-if BLOG_RELATION_MODELS or ENTRY_RELATION_MODELS:
-    from django.contrib.contenttypes.models import ContentType
-    from django.contrib.contenttypes import generic
 
 import datetime
 
