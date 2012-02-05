@@ -87,9 +87,4 @@ urlpatterns += patterns('',
         kwargs = {'template_name':'viewpoint/entry_print.html'},
         name='viewpoint_entry_print'
     ),
-    url(
-        regex= r'xmlrpc/$', 
-        view = 'django_xmlrpc.views.handle_xmlrpc', 
-        name = 'viewpoint_xmlrpc'
-    ),
 )
