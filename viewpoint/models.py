@@ -1,21 +1,21 @@
+import datetime
+
+from django.conf import settings
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.contenttypes import generic
+from django.core.exceptions import ObjectDoesNotExist, ImproperlyConfigured
+from django.core.files.storage import get_storage_class
+from django.core.files.images import get_image_dimensions
 from django.db import models
 from django.db.models import Q
 from django.db.models.loading import get_model
-from django.utils.translation import ugettext_lazy as _
 from django.template.defaultfilters import slugify
-from django.conf import settings
-from django.core.exceptions import ObjectDoesNotExist, ImproperlyConfigured
-from django.core.files.storage import get_storage_class
-from django.contrib.contenttypes.models import ContentType
-from django.contrib.contenttypes import generic
+from django.utils.translation import ugettext_lazy as _
 
-from viewpoint.settings import (STAFF_ONLY, ENTRY_RELATION_MODELS, USE_APPROVAL,
+from .settings import (STAFF_ONLY, ENTRY_RELATION_MODELS, USE_APPROVAL,
                                 BLOG_RELATION_MODELS, DEFAULT_STORAGE,
                                 USE_CATEGORIES, USE_TAGGING, AUTHOR_MODEL, 
                                 DEFAULT_BLOG, MONTH_FORMAT)
-
-
-import datetime
 
 if USE_TAGGING and 'tagging' in settings.INSTALLED_APPS:
     import tagging
@@ -56,42 +56,52 @@ class BlogManager(models.Manager):
         kwargs.update(public=True)
         return self.filter(**kwargs)
 
+    
 class Blog(models.Model):
     """
     A Collection of writings by a user or set of users
     """
-    title = models.CharField(max_length=255)
-    slug = models.SlugField(unique=True)
-    tease = models.TextField(blank=True)
+    title = models.CharField(_("Title"), max_length=255)
+    slug = models.SlugField(_("Slug"), unique=True)
+    tease = models.TextField(_("Tease"), blank=True)
+    
     photo = models.FileField(
+        _("Photo"),
         null=True,
         blank=True,
         storage=IMAGE_STORAGE(),
         upload_to='viewpoint/blog/%Y/%m/%d/')
     photo_width = models.IntegerField(blank=True, null=True)
     photo_height = models.IntegerField(blank=True, null=True)
+
     owners = models.ManyToManyField(
         AUTHOR_MODEL, 
         blank=True, 
-        limit_choices_to=AUTHOR_LIMIT_CHOICES)
-    public = models.BooleanField(default=True)
-    active = models.BooleanField(default=True)
+        limit_choices_to=AUTHOR_LIMIT_CHOICES,
+        verbose_name=_("Owners"))
+    
+    public = models.BooleanField(_("Public"), default=True,
+        help_text=_("Idenifties this blog as being publically accessable."))
+    active = models.BooleanField(_("Active"), default=True)
     creation_date = models.DateTimeField(auto_now_add=True)
     category = category_field
     alternate_title = models.CharField(
+        _("Alternate Title"),
         blank=True,
         default="",
         max_length=100,
         help_text="An alternative title to use on pages with this category."
     )
-    description = models.TextField(blank=True, null=True)
+    description = models.TextField(_("Description"), blank=True, null=True)
     meta_keywords = models.CharField(
+        _("Meta Keywords"),
         blank=True,
         null=True,
         default="",
         max_length=255,
         help_text="Comma-separated keywords for search engines.")
     meta_extra = models.TextField(
+        _("Meta Extra"),
         blank=True,
         null=True,
         default="",
@@ -105,9 +115,12 @@ class Blog(models.Model):
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = slugify(self.title)[:50]
+
+        # If the blog changes its public field, set all
+        # entries to the same.
         self.entry_set.all().update(public=self.public)
+
         if self.photo:
-            from django.core.files.images import get_image_dimensions
             width, height = get_image_dimensions(self.photo.file, close=True)
         else:
             width, height = None, None
@@ -147,32 +160,39 @@ class EntryManager(models.Manager):
         kwargs.update(pub_date__lte=datetime.date.today())
         return self.filter(**kwargs)
 
+    
 class Entry(models.Model):
     """
     An Entry for a Blog
     """
-    blog = models.ForeignKey(Blog)
-    title = models.CharField(max_length=255)
-    slug = models.SlugField(unique_for_date='pub_date')
-    author = models.ForeignKey(AUTHOR_MODEL)
+    blog = models.ForeignKey(Blog, verbose_name=_("Blog"))
+    title = models.CharField(_("Title"), max_length=255)
+    slug = models.SlugField(_("Slug"), unique_for_date='pub_date')
+    author = models.ForeignKey(AUTHOR_MODEL, verbose_name=_("Author"))
     credit = models.CharField(
+        _("Credit"),
         max_length=255, 
         blank=True, 
         null=True)
+    
     photo = models.FileField(
+        _("Photo"),
         null=True,
         blank=True,
         storage=IMAGE_STORAGE(),
         upload_to='viewpoint/entry/%Y/%m/%d/')
     photo_width = models.IntegerField(blank=True, null=True)
     photo_height = models.IntegerField(blank=True, null=True)
-    tease = models.TextField()
-    body = models.TextField()
-    public = models.BooleanField(default=True)
-    approved = models.BooleanField(default=not USE_APPROVAL)
-    pub_date = models.DateField(auto_now_add=True)
-    pub_time = models.TimeField(auto_now_add=True)
-    update_date = models.DateTimeField(auto_now=True)
+
+    tease = models.TextField(_("Tease"))
+    body = models.TextField(_("Body"))
+    
+    public = models.BooleanField(_("Public"), default=True)
+    approved = models.BooleanField(_("Approved"), default=not USE_APPROVAL)
+    pub_date = models.DateField(_("Publication Date"), auto_now_add=True)
+    pub_time = models.TimeField(_("Publication Time"), auto_now_add=True)
+    update_date = models.DateTimeField(_("Update Date"), auto_now=True)
+    
     if HAS_CATEGORIES:
         category = models.ForeignKey(
             Category,
@@ -195,6 +215,7 @@ class Entry(models.Model):
     def save(self, *a, **kw):
         if not self.slug:
             self.slug = slugify(self.title)[:50]
+
         if HAS_CATEGORIES:
             try:
                 self.category = self.blog.category
@@ -202,14 +223,12 @@ class Entry(models.Model):
                 pass
         
         if self.photo:
-            from django.core.files.images import get_image_dimensions
             width, height = get_image_dimensions(self.photo.file, close=True)
         else:
             width, height = None, None
         
         self.photo_width = width
         self.photo_height = height
-        
         
         self.update_date = datetime.datetime.now()
         super(Entry, self).save(*a, **kw)
