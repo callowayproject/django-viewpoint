@@ -3,7 +3,7 @@ import datetime
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
-from django.core.exceptions import ObjectDoesNotExist, ImproperlyConfigured
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.files.storage import get_storage_class
 from django.core.files.images import get_image_dimensions
 from django.db import models
