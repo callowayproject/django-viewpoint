@@ -4,7 +4,7 @@ from django.utils.formats import date_format, time_format
 
 from viewpoint.settings import (USE_APPROVAL, AUTHOR_MODEL, 
                                 BLOG_RELATION_MODELS, ENTRY_RELATION_MODELS)
-from models import Blog, Entry, HAS_CATEGORIES
+from models import Blog, Entry, HAS_CATEGORIES, HAS_TAGGING
 from forms import BlogForm, EntryForm
 
 AuthorModel = get_model(*AUTHOR_MODEL.split('.'))
@@ -108,6 +108,14 @@ if USE_APPROVAL:
 else:
     PUBLIC_FIELDS = ('public',)
 
+EXTRA_FIELDS = ()
+
+if HAS_CATEGORIES:
+    EXTRA_FIELDS += ('category',)
+
+if HAS_TAGGING:
+    EXTRA_FIELDS += ('tags',)
+
 class EntryAdmin(admin.ModelAdmin):
     form = EntryForm
     prepopulated_fields = {"slug": ("title",)}
@@ -119,7 +127,7 @@ class EntryAdmin(admin.ModelAdmin):
     search_fields = ('blog__title', 'title', 'tease', 'body')
     fieldsets = (
         (None, {'fields': (PUBLIC_FIELDS, )}),
-        ('Content', {'fields': ('blog', 'title', 'author', 'tease', 'body', )}),
+        ('Content', {'fields': ('blog', 'title', 'author', 'tease', 'body', ) + EXTRA_FIELDS}),
         ('Media', {'fields': ('photo', 'credit', )}),
         ('Advanced Options', {
             'classes': ('collapse',),
