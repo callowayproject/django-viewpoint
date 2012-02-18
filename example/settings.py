@@ -85,10 +85,13 @@ INSTALLED_APPS = (
     'viewpoint',
     'django.contrib.comments',
     'django.contrib.flatpages',
-    #'south',
+    # 'south',
+    # 'categories',
 )
 VIEWPOINT_SETTINGS = {
     'BLOG_RELATION_MODELS': ('flatpages.flatpage',),
     'DEFAULT_BLOG': 'default',
-    #'DEFAULT_STORAGE' = 'media_storage.MediaStorage'
+    # 'USE_APPROVAL': True,
+    # 'USE_CATEGORIES': True,
+    # 'DEFAULT_STORAGE' = 'media_storage.MediaStorage'
 }

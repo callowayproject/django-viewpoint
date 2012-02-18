@@ -10,8 +10,8 @@ from views import generic_blog_entry_view, blog_detail
 from viewpoint.settings import USE_CATEGORIES, URL_REGEXES, DEFAULT_BLOG
 
 FEEDS = {
-    'all': LatestEntries,
-    'latest': LatestEntriesByBlog,
+    'all': LatestEntries(),
+    'latest': LatestEntriesByBlog(),
 }
 
 if USE_CATEGORIES and 'categories' in settings.INSTALLED_APPS:
@@ -86,10 +86,5 @@ urlpatterns += patterns('',
         view = generic_blog_entry_view, 
         kwargs = {'template_name':'viewpoint/entry_print.html'},
         name='viewpoint_entry_print'
-    ),
-    url(
-        regex= r'xmlrpc/$', 
-        view = 'django_xmlrpc.views.handle_xmlrpc', 
-        name = 'viewpoint_xmlrpc'
     ),
 )
