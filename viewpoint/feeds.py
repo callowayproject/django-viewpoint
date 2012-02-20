@@ -87,7 +87,7 @@ if USE_CATEGORIES and 'categories' in settings.INSTALLED_APPS:
                 return feed_link or obj.get_absolute_url()
 
             def description(self, obj):
-                return feed_decription or "Blog entries recently posted in category %s" % obj.name
+                return feed_description or "Blog entries recently posted in category %s" % obj.name
 
             def items(self, obj):
                 return Entry.objects.published(

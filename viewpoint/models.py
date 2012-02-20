@@ -80,9 +80,9 @@ class Blog(models.Model):
         limit_choices_to=AUTHOR_LIMIT_CHOICES,
         verbose_name=_("Owners"))
     
-    public = models.BooleanField(_("Public"), default=True,
+    public = models.BooleanField(_("Public"), default=False,
         help_text=_("Idenifties this blog as being publically accessable."))
-    active = models.BooleanField(_("Active"), default=True)
+    active = models.BooleanField(_("Active"), default=False)
     creation_date = models.DateTimeField(auto_now_add=True)
     category = category_field
     alternate_title = models.CharField(
