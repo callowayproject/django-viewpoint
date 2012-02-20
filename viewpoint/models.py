@@ -140,6 +140,18 @@ class Blog(models.Model):
         else:
             return ('viewpoint_blog_detail', None, {'blog_slug': self.slug})
     
+    @property
+    def owners_list(self):
+        """
+        Print out the owners in a nice list
+        """
+        owner_list = [unicode(o) for o in self.owners.all()]
+        
+        if len(owner_list) > 1:
+            return "%s and %s" % (", ".join(owner_list[:-1]), owner_list[-1])
+        else:
+            return owner_list[0]
+        
     class Meta:
         ordering = ('title',)
         get_latest_by = 'creation_date'

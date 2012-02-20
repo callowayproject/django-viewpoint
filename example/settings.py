@@ -90,7 +90,7 @@ INSTALLED_APPS = (
 )
 VIEWPOINT_SETTINGS = {
     'BLOG_RELATION_MODELS': ('flatpages.flatpage',),
-    'DEFAULT_BLOG': 'default',
+    # 'DEFAULT_BLOG': 'default',
     # 'USE_APPROVAL': True,
     # 'USE_CATEGORIES': True,
     # 'DEFAULT_STORAGE' = 'media_storage.MediaStorage'

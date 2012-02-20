@@ -3,7 +3,7 @@
 <h1>{{ object.title }}</h1>
 <p>{{ object.description }}</p>
 <h2>Entries</h2>
-
+<p>Owners: {{ object.owners_list}}</p>
 <ul>
 {% for entry in object.entry_set.published %}
 	<li><a href="{{ entry.get_absolute_url }}">{{ entry.title }}</a></li>
