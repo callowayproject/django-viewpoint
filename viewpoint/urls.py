@@ -16,7 +16,7 @@ FEEDS = {
 
 if USE_CATEGORIES and 'categories' in settings.INSTALLED_APPS:
     from feeds import LatestEntriesByCategory
-    FEEDS['categories'] = LatestEntriesByCategory
+    FEEDS['categories'] = LatestEntriesByCategory()
 
 
 urlpatterns = patterns('django.contrib.syndication.views',
