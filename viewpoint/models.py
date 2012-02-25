@@ -149,8 +149,10 @@ class Blog(models.Model):
         
         if len(owner_list) > 1:
             return "%s and %s" % (", ".join(owner_list[:-1]), owner_list[-1])
-        else:
+        elif owners_list:
             return owner_list[0]
+        else:
+            return ''
         
     class Meta:
         ordering = ('title',)
