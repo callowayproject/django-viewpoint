@@ -149,7 +149,7 @@ class Blog(models.Model):
         
         if len(owner_list) > 1:
             return "%s and %s" % (", ".join(owner_list[:-1]), owner_list[-1])
-        elif owners_list:
+        elif owner_list:
             return owner_list[0]
         else:
             return ''
