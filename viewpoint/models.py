@@ -151,7 +151,14 @@ class Blog(models.Model):
             return owner_list[0]
         else:
             return ''
+    
+    if BLOG_RELATION_MODELS:
+        def get_related_content_type(self, content_type):
+            return self.blogrelation_set.filter(content_type__name=content_type)
         
+        def get_relation_type(self, relation_type):
+            return self.blogrelation_set.filter(relation_type=relation_type)
+    
     class Meta:
         ordering = ('title',)
         get_latest_by = 'creation_date'
