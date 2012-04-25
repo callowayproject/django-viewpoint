@@ -208,8 +208,8 @@ class Entry(models.Model):
     
     public = models.BooleanField(_("Public"), default=True)
     approved = models.BooleanField(_("Approved"), default=not USE_APPROVAL)
-    pub_date = models.DateField(_("Publication Date"), auto_now_add=True)
-    pub_time = models.TimeField(_("Publication Time"), auto_now_add=True)
+    pub_date = models.DateField(_("Publication Date"))
+    pub_time = models.TimeField(_("Publication Time"))
     update_date = models.DateTimeField(_("Update Date"), auto_now=True)
     
     if HAS_CATEGORIES:
@@ -221,6 +221,18 @@ class Entry(models.Model):
     if HAS_TAGGING:
         tags = TagField(blank=True, null=True)
     objects = EntryManager()
+    
+    @property
+    def modified(self):
+        """
+        A shortcut to show either the pub_date/time or update_date, which ever
+        is latest
+        """
+        pub = datetime.datetime.combine(self.pub_date, self.pub_time)
+        if self.update_date > pub:
+            return self.update_date
+        else:
+            return pub
     
     class Meta:
         unique_together = ('blog', 'pub_date', 'slug')
