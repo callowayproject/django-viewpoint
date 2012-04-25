@@ -34,7 +34,7 @@ class BlogAdmin(admin.ModelAdmin):
             'fields': ('title', 'tease', 'photo'),
         }),
         ('Ownership and Viewing', {
-            'fields': ('public', 'active', 'owners'),
+            'fields': ('public', 'active', 'owners',),
         }),
         ('Meta Data', {
             'fields': ('alternate_title', 'description', 'meta_keywords', 'meta_extra'),
@@ -127,7 +127,8 @@ class EntryAdmin(admin.ModelAdmin):
     search_fields = ('blog__title', 'title', 'tease', 'body')
     fieldsets = (
         (None, {'fields': (PUBLIC_FIELDS, )}),
-        ('Content', {'fields': ('blog', 'title', 'author', 'tease', 'body', ) + EXTRA_FIELDS}),
+        ('Content', {'fields': ('blog', 'title', 'author', 'tease', 'body', 
+                               ('pub_date', 'pub_time') ) + EXTRA_FIELDS}),
         ('Media', {'fields': ('photo', 'credit', )}),
         ('Advanced Options', {
             'classes': ('collapse',),
