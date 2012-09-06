@@ -228,7 +228,7 @@ class EntryAdmin(admin.ModelAdmin):
                 blog_ids = Blog.objects.filter(
                     owners__in=[request.user.pk,]).values_list('pk', flat=True)
                 author_pk = request.user.pk
-            return qs.filter(Q(blog__id__in=blog_ids) | Q(authors__pk=author_pk))
+            return qs.filter(Q(blog__id__in=blog_ids) | Q(authors__pk=author_pk)).distinct()
     
     # def save_model(self, request, obj, form, change):
     #     obj.author = request.user
