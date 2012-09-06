@@ -165,16 +165,16 @@ class EntryAdmin(admin.ModelAdmin):
             return db_field.formfield(**kwargs)
         return super(EntryAdmin, self).formfield_for_foreignkey(db_field, request, **kwargs)
     
-    def formfield_for_manytomany(self, db_field, request, **kwargs):
-        if not request.user.is_superuser and db_field.name == "authors":
-            if AuthorModel.__name__ == "StaffMember":
-                kwargs["queryset"] = AuthorModel.objects.filter(user__pk=request.user.pk)
-            else:
-                from django.contrib.auth.models import User
-                kwargs["queryset"] = User.objects.filter(pk=request.user.pk)
-            return db_field.formfield(**kwargs)
-           
-        return super(EntryAdmin, self).formfield_for_manytomany(db_field, request, **kwargs)
+#    def formfield_for_manytomany(self, db_field, request, **kwargs):
+#        if not request.user.is_superuser and db_field.name == "authors":
+#            if AuthorModel.__name__ == "StaffMember":
+#                kwargs["queryset"] = AuthorModel.objects.filter(user__pk=request.user.pk)
+#            else:
+#                from django.contrib.auth.models import User
+#                kwargs["queryset"] = User.objects.filter(pk=request.user.pk)
+#            return db_field.formfield(**kwargs)
+#           
+#        return super(EntryAdmin, self).formfield_for_manytomany(db_field, request, **kwargs)
     
     def make_approved(self, request, queryset):
         rows_updated = queryset.update(approved=True)
