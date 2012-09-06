@@ -1,6 +1,8 @@
 {% extends "viewpoint/viewpoint_base.html" %}
+{% load viewpoint %}
 {% block content %}
 <h1>{{ object.title }}</h1>
-<p class="byline">By {{ object.author.first_name }} {{ object.author.last_name }}</p>
+{% display_authors_by_ordered_string object.authors object.non_staff_author as ordered_authors_string %}
+<p class="byline">By {{ordered_authors_string}}</p>
 {{ object.body }}
 {% endblock %}

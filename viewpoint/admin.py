@@ -121,13 +121,15 @@ class EntryAdmin(admin.ModelAdmin):
     prepopulated_fields = {"slug": ("title",)}
     date_hierarchy = 'pub_date'
     related_search_fields = {
-        'author': ('^user__username', '^first_name', '^last_name'),
+        'authors': ('^user__username', '^first_name', '^last_name'),
     }
+    filter_horizontal = ('authors',)
     actions = ['make_approved', 'make_not_approved', 'make_public', 'make_not_public']
     search_fields = ('blog__title', 'title', 'tease', 'body')
     fieldsets = (
         (None, {'fields': (PUBLIC_FIELDS, )}),
-        ('Content', {'fields': ('blog', 'title', 'author', 'tease', 'body', ) + EXTRA_FIELDS}),
+        ('Content', {'fields': ('blog', 'title', 'authors', 'non_staff_author', 
+                                'tease', 'body', ) + EXTRA_FIELDS}),
         ('Media', {'fields': ('photo', 'credit', )}),
         ('Advanced Options', {
             'classes': ('collapse',),
@@ -153,23 +155,26 @@ class EntryAdmin(admin.ModelAdmin):
     last_updated.admin_order_field = 'update_date'
     
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
-        if not request.user.is_superuser:
-            if db_field.name == "author":
-                if AuthorModel.__name__ == "StaffMember":
-                    kwargs["queryset"] = AuthorModel.objects.filter(user__pk=request.user.pk)
-                else:
-                    from django.contrib.auth.models import User
-                    kwargs["queryset"] = User.objects.filter(pk=request.user.pk)
-                return db_field.formfield(**kwargs)
-            elif db_field.name == "blog":
-                if AuthorModel.__name__ == "StaffMember":
-                    kwargs["queryset"] = Blog.objects.filter(
-                        owners__in=AuthorModel.objects.filter(
-                            user__pk=request.user.pk))
-                else:
-                    kwargs["queryset"] = Blog.objects.filter(owners__in=[request.user,])
-                return db_field.formfield(**kwargs)
+        if not request.user.is_superuser and db_field.name == "blog":
+            if AuthorModel.__name__ == "StaffMember":
+                kwargs["queryset"] = Blog.objects.filter(
+                    owners__in=AuthorModel.objects.filter(
+                        user__pk=request.user.pk))
+            else:
+                kwargs["queryset"] = Blog.objects.filter(owners__in=[request.user,])
+            return db_field.formfield(**kwargs)
         return super(EntryAdmin, self).formfield_for_foreignkey(db_field, request, **kwargs)
+    
+    def formfield_for_manytomany(self, db_field, request, **kwargs):
+        if not request.user.is_superuser and db_field.name == "authors":
+            if AuthorModel.__name__ == "StaffMember":
+                kwargs["queryset"] = AuthorModel.objects.filter(user__pk=request.user.pk)
+            else:
+                from django.contrib.auth.models import User
+                kwargs["queryset"] = User.objects.filter(pk=request.user.pk)
+            return db_field.formfield(**kwargs)
+           
+        return super(EntryAdmin, self).formfield_for_manytomany(db_field, request, **kwargs)
     
     def make_approved(self, request, queryset):
         rows_updated = queryset.update(approved=True)
@@ -223,7 +228,7 @@ class EntryAdmin(admin.ModelAdmin):
                 blog_ids = Blog.objects.filter(
                     owners__in=[request.user.pk,]).values_list('pk', flat=True)
                 author_pk = request.user.pk
-            return qs.filter(Q(blog__id__in=blog_ids) | Q(author__pk=author_pk))
+            return qs.filter(Q(blog__id__in=blog_ids) | Q(authors__pk=author_pk))
     
     # def save_model(self, request, obj, form, change):
     #     obj.author = request.user
