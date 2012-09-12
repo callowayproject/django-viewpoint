@@ -216,9 +216,9 @@ class Entry(models.Model):
     
     public = models.BooleanField(_("Public"), default=True)
     approved = models.BooleanField(_("Approved"), default=not USE_APPROVAL)
-    pub_date = models.DateField(_("Publication Date"), auto_now_add=True)
-    pub_time = models.TimeField(_("Publication Time"), auto_now_add=True)
-    update_date = models.DateTimeField(_("Update Date"), auto_now=True)
+    pub_date = models.DateField(_("Publication Date"), default=datetime.date.today)
+    pub_time = models.TimeField(_("Publication Time"), default=datetime.datetime.now().time)
+    update_date = models.DateTimeField(_("Update Date"))
     
     if HAS_CATEGORIES:
         category = models.ForeignKey(

@@ -126,6 +126,7 @@ class EntryAdmin(admin.ModelAdmin):
     filter_horizontal = ('authors',)
     actions = ['make_approved', 'make_not_approved', 'make_public', 'make_not_public']
     search_fields = ('blog__title', 'title', 'tease', 'body')
+    readonly_fields = ('update_date',)
     fieldsets = (
         (None, {'fields': (PUBLIC_FIELDS, )}),
         ('Content', {'fields': ('blog', 'title', 'authors', 'non_staff_author', 
@@ -133,7 +134,7 @@ class EntryAdmin(admin.ModelAdmin):
         ('Media', {'fields': ('photo', 'credit', )}),
         ('Advanced Options', {
             'classes': ('collapse',),
-            'fields': ('slug', ),
+            'fields': ('slug', 'pub_date', 'pub_time', 'update_date'),
         }),
     
     )
