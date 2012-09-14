@@ -187,7 +187,15 @@ class Entry(models.Model):
     blog = models.ForeignKey(Blog, verbose_name=_("Blog"))
     title = models.CharField(_("Title"), max_length=255)
     slug = models.SlugField(_("Slug"), unique_for_date='pub_date')
-    author = models.ForeignKey(AUTHOR_MODEL, verbose_name=_("Author"))
+    authors = models.ManyToManyField(AUTHOR_MODEL, 
+        verbose_name=_('Authors'), related_name='blog_entry',
+        blank=True, 
+        null=True)
+    non_staff_author = models.CharField(_('Non-staff author(s)'), 
+        max_length=200, 
+        blank=True, 
+        null=True,
+        help_text=_("An HTML-formatted rendering of an author(s) not on staff."))
     credit = models.CharField(
         _("Credit"),
         max_length=255, 
@@ -208,9 +216,9 @@ class Entry(models.Model):
     
     public = models.BooleanField(_("Public"), default=True)
     approved = models.BooleanField(_("Approved"), default=not USE_APPROVAL)
-    pub_date = models.DateField(_("Publication Date"), auto_now_add=True)
-    pub_time = models.TimeField(_("Publication Time"), auto_now_add=True)
-    update_date = models.DateTimeField(_("Update Date"), auto_now=True)
+    pub_date = models.DateField(_("Publication Date"), default=datetime.date.today)
+    pub_time = models.TimeField(_("Publication Time"), default=datetime.datetime.now().time)
+    update_date = models.DateTimeField(_("Update Date"))
     
     if HAS_CATEGORIES:
         category = models.ForeignKey(
@@ -281,6 +289,15 @@ class Entry(models.Model):
         text = "<html><head></head><body>" + self.body + "</body></html>"
         soup = BeautifulSoup(text)
         return [i for i in soup.body.childGenerator() if isinstance(i, Tag)]
+    
+    @property
+    def author(self):
+        """ author returns the first author in the many to many table """
+        if not hasattr(self, '_author'):
+            authors = self.authors.all()
+            if authors:
+                self._author = authors[0]
+        return self._author
     
     if ENTRY_RELATION_MODELS:
         def get_related_content_type(self, content_type):
