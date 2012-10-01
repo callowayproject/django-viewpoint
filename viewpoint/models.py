@@ -14,7 +14,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from .settings import (STAFF_ONLY, ENTRY_RELATION_MODELS, USE_APPROVAL,
                                 BLOG_RELATION_MODELS, DEFAULT_STORAGE,
-                                USE_CATEGORIES, USE_TAGGING, AUTHOR_MODEL, 
+                                USE_CATEGORIES, USE_TAGGING, AUTHOR_MODEL,
                                 DEFAULT_BLOG, MONTH_FORMAT)
 
 if USE_TAGGING and 'tagging' in settings.INSTALLED_APPS:
@@ -54,7 +54,7 @@ class BlogManager(models.Manager):
         kwargs.update(public=True)
         return self.filter(**kwargs)
 
-    
+
 class Blog(models.Model):
     """
     A Collection of writings by a user or set of users
@@ -62,7 +62,7 @@ class Blog(models.Model):
     title = models.CharField(_("Title"), max_length=255)
     slug = models.SlugField(_("Slug"), unique=True)
     tease = models.TextField(_("Tease"), blank=True)
-    
+
     photo = models.FileField(
         _("Photo"),
         null=True,
@@ -73,11 +73,11 @@ class Blog(models.Model):
     photo_height = models.IntegerField(blank=True, null=True)
 
     owners = models.ManyToManyField(
-        AUTHOR_MODEL, 
-        blank=True, 
+        AUTHOR_MODEL,
+        blank=True,
         limit_choices_to=AUTHOR_LIMIT_CHOICES,
         verbose_name=_("Owners"))
-    
+
     public = models.BooleanField(_("Public"), default=False,
         help_text=_("Idenifties this blog as being publically accessable."))
     active = models.BooleanField(_("Active"), default=False)
@@ -104,12 +104,12 @@ class Blog(models.Model):
         null=True,
         default="",
         help_text="(Advanced) Any additional HTML to be placed verbatim in the &lt;head&gt;")
-    
+
     objects = BlogManager()
-    
+
     def __unicode__(self):
         return self.title
-    
+
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = slugify(self.title)[:50]
@@ -122,12 +122,12 @@ class Blog(models.Model):
             width, height = get_image_dimensions(self.photo.file, close=True)
         else:
             width, height = None, None
-        
+
         self.photo_width = width
         self.photo_height = height
-        
+
         super(Blog, self).save(*args, **kwargs)
-    
+
     @models.permalink
     def get_absolute_url(self):
         """
@@ -137,28 +137,28 @@ class Blog(models.Model):
             return ('viewpoint_blog_detail', None, None)
         else:
             return ('viewpoint_blog_detail', None, {'blog_slug': self.slug})
-    
+
     @property
     def owners_list(self):
         """
         Print out the owners in a nice list
         """
         owner_list = [unicode(o) for o in self.owners.all()]
-        
+
         if len(owner_list) > 1:
             return "%s and %s" % (", ".join(owner_list[:-1]), owner_list[-1])
         elif owner_list:
             return owner_list[0]
         else:
             return ''
-    
+
     if BLOG_RELATION_MODELS:
         def get_related_content_type(self, content_type):
             return self.blogrelation_set.filter(content_type__name=content_type)
-        
+
         def get_relation_type(self, relation_type):
             return self.blogrelation_set.filter(relation_type=relation_type)
-    
+
     class Meta:
         ordering = ('title',)
         get_latest_by = 'creation_date'
@@ -179,7 +179,7 @@ class EntryManager(models.Manager):
         kwargs.update(pub_date__lte=datetime.date.today())
         return self.filter(**kwargs)
 
-    
+
 class Entry(models.Model):
     """
     An Entry for a Blog
@@ -187,13 +187,21 @@ class Entry(models.Model):
     blog = models.ForeignKey(Blog, verbose_name=_("Blog"))
     title = models.CharField(_("Title"), max_length=255)
     slug = models.SlugField(_("Slug"), unique_for_date='pub_date')
-    author = models.ForeignKey(AUTHOR_MODEL, verbose_name=_("Author"))
+    authors = models.ManyToManyField(AUTHOR_MODEL,
+        verbose_name=_('Authors'), related_name='blog_entry',
+        blank=True,
+        null=True)
+    non_staff_author = models.CharField(_('Non-staff author(s)'),
+        max_length=200,
+        blank=True,
+        null=True,
+        help_text=_("An HTML-formatted rendering of an author(s) not on staff."))
     credit = models.CharField(
         _("Credit"),
-        max_length=255, 
-        blank=True, 
+        max_length=255,
+        blank=True,
         null=True)
-    
+
     photo = models.FileField(
         _("Photo"),
         null=True,
@@ -205,13 +213,13 @@ class Entry(models.Model):
 
     tease = models.TextField(_("Tease"))
     body = models.TextField(_("Body"))
-    
+
     public = models.BooleanField(_("Public"), default=True)
     approved = models.BooleanField(_("Approved"), default=not USE_APPROVAL)
-    pub_date = models.DateField(_("Publication Date"))
-    pub_time = models.TimeField(_("Publication Time"))
-    update_date = models.DateTimeField(_("Update Date"), auto_now=True)
-    
+    pub_date = models.DateField(_("Publication Date"), default=datetime.date.today)
+    pub_time = models.TimeField(_("Publication Time"), default=datetime.datetime.now().time)
+    update_date = models.DateTimeField(_("Update Date"))
+
     if HAS_CATEGORIES:
         category = models.ForeignKey(
             Category,
@@ -221,7 +229,7 @@ class Entry(models.Model):
     if HAS_TAGGING:
         tags = TagField(blank=True, null=True)
     objects = EntryManager()
-    
+
     @property
     def modified(self):
         """
@@ -233,16 +241,16 @@ class Entry(models.Model):
             return self.update_date
         else:
             return pub
-    
+
     class Meta:
         unique_together = ('blog', 'pub_date', 'slug')
         verbose_name_plural = _('Entries')
         get_latest_by = 'update_date'
         ordering = ('-pub_date', '-pub_time',)
-        
+
     def __unicode__(self):
         return self.title
-    
+
     def save(self, *a, **kw):
         if not self.slug:
             self.slug = slugify(self.title)[:50]
@@ -252,15 +260,15 @@ class Entry(models.Model):
                 self.category = self.blog.category
             except ObjectDoesNotExist:
                 pass
-        
+
         if self.photo:
             width, height = get_image_dimensions(self.photo.file, close=True)
         else:
             width, height = None, None
-        
+
         self.photo_width = width
         self.photo_height = height
-        
+
         self.update_date = datetime.datetime.now()
         super(Entry, self).save(*a, **kw)
 
@@ -286,21 +294,30 @@ class Entry(models.Model):
                 'slug': self.slug
             }
         return ('viewpoint_entry_detail', None, kwargs)
-    
+
     @property
     def paragraphs(self):
         from BeautifulSoup import BeautifulSoup, Tag
         text = "<html><head></head><body>" + self.body + "</body></html>"
         soup = BeautifulSoup(text)
         return [i for i in soup.body.childGenerator() if isinstance(i, Tag)]
-    
+
+    @property
+    def author(self):
+        """ author returns the first author in the many to many table """
+        if not hasattr(self, '_author'):
+            authors = self.authors.all()
+            if authors:
+                self._author = authors[0]
+        return self._author
+
     if ENTRY_RELATION_MODELS:
         def get_related_content_type(self, content_type):
             return self.entryrelation_set.filter(content_type__name=content_type)
-        
+
         def get_relation_type(self, relation_type):
             return self.entryrelation_set.filter(relation_type=relation_type)
-    
+
 if HAS_TAGGING:
     tagging.register(Blog)
 
@@ -311,16 +328,16 @@ class EntryRelation(models.Model):
     """Related entry item"""
     entry = models.ForeignKey(Entry)
     content_type = models.ForeignKey(
-        ContentType, 
+        ContentType,
         limit_choices_to=ENTRY_RELATION_LIMITS)
     object_id = models.PositiveIntegerField()
     content_object = generic.GenericForeignKey('content_type', 'object_id')
-    relation_type = models.CharField(_("Relation Type"), 
-        max_length="200", 
-        blank=True, 
+    relation_type = models.CharField(_("Relation Type"),
+        max_length="200",
+        blank=True,
         null=True,
         help_text=_("A generic text field to tag a relation, like 'leadphoto'."))
-        
+
     def __unicode__(self):
         return u"EntryRelation"
 
@@ -331,16 +348,16 @@ class BlogRelation(models.Model):
     """Related blog item"""
     blog = models.ForeignKey(Blog)
     content_type = models.ForeignKey(
-        ContentType, 
+        ContentType,
         limit_choices_to=BLOG_RELATION_LIMITS)
     object_id = models.PositiveIntegerField()
     content_object = generic.GenericForeignKey('content_type', 'object_id')
-    relation_type = models.CharField(_("Relation Type"), 
-        max_length="200", 
-        blank=True, 
+    relation_type = models.CharField(_("Relation Type"),
+        max_length="200",
+        blank=True,
         null=True,
         help_text=_("A generic text field to tag a relation, like 'leadphoto'."))
-        
+
     def __unicode__(self):
         return u"BlogRelation"
 
